@@ -37,6 +37,14 @@ th,td{padding:8px 10px;border-bottom:1px solid var(--borda);text-align:right;whi
 th:first-child,td:first-child{text-align:left}
 th{color:var(--texto2);font-weight:600;font-size:.8rem}
 tr:last-child td{border-bottom:0}
+.col-btn{display:inline-flex;align-items:center;justify-content:flex-end;gap:4px;width:100%;margin:0;border:1px solid transparent;background:transparent;color:inherit;font:inherit;font-weight:600;font-size:.8rem;line-height:1.2;cursor:pointer;padding:6px 2px;border-radius:8px;white-space:nowrap}
+.col-btn svg{width:14px;height:14px;flex:none;display:block}
+.col-btn[aria-pressed="true"]{color:var(--azul2);background:color-mix(in srgb, var(--azul2) 16%, transparent);border-color:color-mix(in srgb, var(--azul2) 40%, transparent)}
+th.col-ativa,td.col-ativa{background:color-mix(in srgb, var(--azul2) 12%, transparent)}
+.col-btn:focus-visible{outline:2px solid var(--azul2);outline-offset:1px}
+.col-grafico{margin-top:12px}
+.col-grafico h3{color:var(--texto);font-size:1rem}
+h3.etapa-tab{margin-top:22px}
 .ok{color:var(--ok);font-weight:600}.abaixo{color:var(--alerta);font-weight:600}
 .titulo-acao{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:28px}
 .titulo-acao h2{margin:0}
