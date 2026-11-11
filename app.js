@@ -7,31 +7,127 @@
   function el(tag, attrs, txt){ var e = document.createElementNS(NS, tag); for (var k in attrs) e.setAttribute(k, attrs[k]); if (txt !== undefined) e.textContent = txt; return e; }
   function cssVar(n){ return getComputedStyle(document.documentElement).getPropertyValue(n).trim(); }
 
-  /* Gráfico de linhas em SVG. series: [{nome, valores, cor, tracejado}] ; valores null = lacuna */
-  function linhas(alvo, rotulos, series, min, max, fmt){
+  /* Gráfico de linhas em SVG. series: [{nome, valores, cor, tracejado}] ; valores null = lacuna.
+     A série contínua recebe o valor em todos os pontos. fmtEixo (opcional) formata o eixo. */
+  function linhas(alvo, rotulos, series, min, max, fmt, fmtEixo){
     alvo.innerHTML = "";
+    var eixo = fmtEixo || fmt;
     var leg = document.createElement("div"); leg.className = "leg";
     series.forEach(function(s){ var sp = document.createElement("span"); var i = document.createElement("i"); if (s.tracejado) i.className = "tr"; else i.style.background = s.cor; sp.appendChild(i); sp.appendChild(document.createTextNode(s.nome)); leg.appendChild(sp); });
     alvo.appendChild(leg);
-    var W = Math.max(300, Math.min(700, alvo.clientWidth || 560)), H = Math.round(Math.max(200, Math.min(260, W * 0.55))), L = 34, R = 14, T = 16, B = 30;
+    var W = Math.max(300, Math.min(700, alvo.clientWidth || 560));
+    var H = Math.round(Math.max(228, Math.min(290, W * 0.62)));
+    var L = 42, R = 16, T = 28, B = 34;
     var svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": series.map(function(s){return s.nome;}).join(" e ") });
     var n = rotulos.length, x = function(i){ return L + (n === 1 ? 0 : i * (W - L - R) / (n - 1)); }, y = function(v){ return T + (max - v) * (H - T - B) / (max - min); };
-    var tx2 = cssVar("--texto2"), bd = cssVar("--borda");
+    var tx2 = cssVar("--texto2"), bd = cssVar("--borda"), papel = cssVar("--papel") || "#fff";
     var passo = (max - min) / 4;
-    for (var k = 0; k <= 4; k++){ var v = min + k * passo; svg.appendChild(el("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: bd, "stroke-width": 1 })); svg.appendChild(el("text", { x: L - 6, y: y(v) + 4, "text-anchor": "end", "font-size": 11, fill: tx2 }, fmt(v))); }
-    var mostrar = n <= 6 ? function(){ return true; } : function(i){ var p = W < 480 ? 3 : 2; return i === n - 1 || (i % p === 0 && n - 1 - i >= p); };
-    rotulos.forEach(function(r, i){ if (mostrar(i)) svg.appendChild(el("text", { x: x(i), y: H - 8, "text-anchor": i === 0 ? "start" : (i === n - 1 ? "end" : "middle"), "font-size": 11, fill: tx2 }, r)); });
+    for (var k = 0; k <= 4; k++){ var gv = min + k * passo; svg.appendChild(el("line", { x1: L, x2: W - R, y1: y(gv), y2: y(gv), stroke: bd, "stroke-width": 1 })); svg.appendChild(el("text", { x: L - 6, y: y(gv) + 4, "text-anchor": "end", "font-size": 11, fill: tx2 }, eixo(gv))); }
+    var fsAno = W < 480 ? 10 : 11;
+    var espaco = n <= 1 ? W : (W - L - R) / (n - 1);
+    /* Anos completos só cabem quando o vão entre pontos é maior que o texto "2007". */
+    var mostrar = (n <= 6 || espaco >= 38) ? function(){ return true; } : function(i){ var p = espaco >= 28 ? 2 : 3; return i === n - 1 || (i % p === 0 && n - 1 - i >= p); };
+    rotulos.forEach(function(r, i){ if (mostrar(i)) svg.appendChild(el("text", { x: x(i), y: H - 10, "text-anchor": i === 0 ? "start" : (i === n - 1 ? "end" : "middle"), "font-size": fsAno, fill: tx2 }, r)); });
+    var metaS = null;
+    series.forEach(function(s){ if (s.tracejado) metaS = s; });
     series.forEach(function(s){
       var d = "", pen = false;
       s.valores.forEach(function(v, i){ if (v === null || !isFinite(v)) { pen = false; return; } d += (pen ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1); pen = true; });
       svg.appendChild(el("path", { d: d, fill: "none", stroke: s.cor, "stroke-width": s.tracejado ? 2 : 3, "stroke-dasharray": s.tracejado ? "6 5" : "none", "stroke-linejoin": "round", "stroke-linecap": "round" }));
       if (!s.tracejado) s.valores.forEach(function(v, i){
-        if (v === null) return;
-        var c = el("circle", { cx: x(i), cy: y(v), r: 4, fill: s.cor }); c.appendChild(el("title", {}, rotulos[i] + ": " + fmt(v))); svg.appendChild(c);
-        if (i === s.valores.length - 1) svg.appendChild(el("text", { x: x(i) - 8, y: y(v) - 9, "text-anchor": "end", "font-size": 12, "font-weight": 700, fill: s.cor }, fmt(v)));
+        if (v === null || !isFinite(v)) return;
+        var c = el("circle", { cx: x(i), cy: y(v), r: 3.5, fill: s.cor }); c.appendChild(el("title", {}, rotulos[i] + ": " + fmt(v))); svg.appendChild(c);
       });
     });
     alvo.appendChild(svg);
+    var fs = W < 420 ? 9 : (W < 600 ? 10 : 11);
+    var boxes = [];
+    function hit(b){
+      for (var i = 0; i < boxes.length; i++){
+        var o = boxes[i];
+        if (!(b.x2 < o.x1 || b.x1 > o.x2 || b.y2 < o.y1 || b.y1 > o.y2)) return true;
+      }
+      return false;
+    }
+    function cruzaMeta(b){
+      if (!metaS) return false;
+      var vals = metaS.valores;
+      for (var i = 0; i < vals.length; i++){
+        var v = vals[i];
+        if (v === null || !isFinite(v)) continue;
+        var px = x(i), py = y(v);
+        if (px >= b.x1 - 3 && px <= b.x2 + 3 && py >= b.y1 - 4 && py <= b.y2 + 4) return true;
+        var v2 = i + 1 < vals.length ? vals[i + 1] : null;
+        if (v2 === null || !isFinite(v2)) continue;
+        var qx = x(i + 1), qy = y(v2);
+        for (var t = 1; t <= 8; t++){
+          var sx = px + (qx - px) * t / 9, sy = py + (qy - py) * t / 9;
+          if (sx >= b.x1 - 2 && sx <= b.x2 + 2 && sy >= b.y1 - 3 && sy <= b.y2 + 3) return true;
+        }
+      }
+      return false;
+    }
+    function cruzaEixo(b){
+      for (var t = 0; t <= 4; t++){
+        var yy = y(min + t * passo);
+        if (!(b.x2 < 0 || b.x1 > L - 2 || b.y2 < yy - 9 || b.y1 > yy + 5)) return true;
+      }
+      return false;
+    }
+    series.forEach(function(s){
+      if (s.tracejado) return;
+      s.valores.forEach(function(v, i){
+        if (v === null || !isFinite(v)) return;
+        var texto = fmt(v);
+        var metaV = metaS ? metaS.valores[i] : null;
+        var metaAcima = metaV !== null && metaV !== undefined && isFinite(metaV) && metaV > v;
+        var acima = -(fs + 6), abaixo = fs + 12;
+        var cands = [];
+        function add(dy, anchor, dx){ cands.push({ dy: dy, anchor: anchor, dx: dx || 0 }); }
+        if (i === 0) { add(acima, "start", 7); add(abaixo, "start", 7); }
+        else if (i === n - 1) { add(acima, "end", -7); add(abaixo, "end", -7); }
+        if (metaAcima) { add(abaixo, "middle"); add(acima, "middle"); }
+        else { add(acima, "middle"); add(abaixo, "middle"); }
+        add(metaAcima ? abaixo + fs + 4 : acima - (fs + 3), "middle");
+        add(metaAcima ? acima - (fs + 3) : abaixo + fs + 4, "middle");
+        if (i !== 0 && i !== n - 1) { add(acima, "start", 7); add(acima, "end", -7); add(abaixo, "start", 7); add(abaixo, "end", -7); }
+        var node = el("text", { "font-size": fs, "font-weight": 700, fill: s.cor }, texto);
+        svg.appendChild(node);
+        var len = 0;
+        try { len = node.getComputedTextLength(); } catch (err) { len = 0; }
+        if (!len) len = texto.length * fs * 0.62;
+        var th = fs * 0.82;
+        var chosen = null;
+        for (var c = 0; c < cands.length; c++){
+          var cd = cands[c];
+          var cx = x(i) + cd.dx, cy = y(v) + cd.dy;
+          var x1 = cd.anchor === "start" ? cx : cd.anchor === "end" ? cx - len : cx - len / 2;
+          var b = { x1: x1 - 1.5, y1: cy - th, x2: x1 + len + 1.5, y2: cy + 2 };
+          if (b.x1 < 1 || b.x2 > W - 1 || b.y1 < 1 || b.y2 > H - 20) continue;
+          if (hit(b) || cruzaMeta(b) || cruzaEixo(b)) continue;
+          if (x(i) >= b.x1 && x(i) <= b.x2 && y(v) >= b.y1 && y(v) <= b.y2) continue;
+          chosen = { cx: cx, cy: cy, anchor: cd.anchor, b: b };
+          break;
+        }
+        if (!chosen) {
+          var fb = cands[0];
+          var cx2 = x(i) + fb.dx, cy2 = Math.min(H - 22, Math.max(th + 1, y(v) + fb.dy));
+          var x1b = fb.anchor === "start" ? cx2 : fb.anchor === "end" ? cx2 - len : cx2 - len / 2;
+          chosen = { cx: cx2, cy: cy2, anchor: fb.anchor, b: { x1: x1b - 1.5, y1: cy2 - th, x2: x1b + len + 1.5, y2: cy2 + 2 } };
+        }
+        node.setAttribute("x", chosen.cx);
+        node.setAttribute("y", chosen.cy);
+        node.setAttribute("text-anchor", chosen.anchor);
+        var halo = node.cloneNode(true);
+        halo.setAttribute("fill", papel);
+        halo.setAttribute("stroke", papel);
+        halo.setAttribute("stroke-width", "4");
+        halo.setAttribute("stroke-linejoin", "round");
+        halo.setAttribute("aria-hidden", "true");
+        svg.insertBefore(halo, node);
+        boxes.push(chosen.b);
+      });
+    });
   }
 
   function colunas(alvo, itens){
@@ -57,23 +153,36 @@
   var I = D.ideb;
   function situacao(o, m){ if (m === null) return "—"; return o >= m ? '<span class="ok">Atingiu</span>' : '<span class="abaixo">Abaixo</span>'; }
 
-  function desenharIdeb(){
+  function desenharSeries(){
     document.querySelectorAll("[data-grafico]").forEach(function(g){
-      var et = g.getAttribute("data-grafico").split("-")[1];
-      linhas(g, I.anos, [
-        { nome: "IDEB observado", valores: I[et].obs, cor: cssVar("--azul2") },
-        { nome: "Meta", valores: I[et].meta, cor: cssVar("--meta"), tracejado: true }
-      ], 3, 7, function(v){ return br(v); });
+      var partes = g.getAttribute("data-grafico").split("-");
+      var tipo = partes[0], et = partes[1];
+      if (tipo === "ideb") {
+        linhas(g, I.anos, [
+          { nome: "IDEB observado", valores: I[et].obs, cor: cssVar("--azul2") },
+          { nome: "Meta", valores: I[et].meta, cor: cssVar("--meta"), tracejado: true }
+        ], 3, 7, function(v){ return br(v); });
+      } else if (tipo === "idear") {
+        linhas(g, D.idear.anos, [
+          { nome: et === "AF" ? "Anos Finais" : "Anos Iniciais", valores: D.idear[et], cor: et === "AF" ? cssVar("--teal") : cssVar("--azul2") }
+        ], 2, 8, function(v){ return br(v, 2); }, function(v){ return br(v, 1); });
+      }
     });
   }
 
-  /* Métricas */
+  /* Métricas: valor mais recente, ano e variação em relação à edição anterior */
+  function variacao(atual, anterior, casas){
+    var fator = Math.pow(10, casas);
+    var d = Math.round((atual - anterior) * fator) / fator;
+    return (d > 0 ? "+" : "") + br(d, casas);
+  }
   var ult = I.anos.length - 1, av = D.avaliaRJ[D.avaliaRJ.length - 1], avAnt = D.avaliaRJ[D.avaliaRJ.length - 2], ia = D.idear.anos.length - 1;
   var mets = [
-    [br(I.AI.obs[ult]), "IDEB Anos Iniciais (" + I.anos[ult] + ")", br(I.AI.obs[ult - 1]) + " em " + I.anos[ult - 1] + " · meta de 2021: " + br(I.AI.meta[7])],
-    [br(I.AF.obs[ult]), "IDEB Anos Finais (" + I.anos[ult] + ")", br(I.AF.obs[ult - 1]) + " em " + I.anos[ult - 1] + " · meta de 2021: " + br(I.AF.meta[7])],
-    [br(av.pct, 0) + "%", "Crianças alfabetizadas – Avalia RJ (" + av.ano + ")", "Meta: " + br(av.meta, 0) + "% · " + avAnt.ano + ": " + br(avAnt.pct) + "%"],
-    [br(D.idear.AI[ia], 2), "IDEAR Anos Iniciais (" + D.idear.anos[ia] + ")", "Anos Finais: " + br(D.idear.AF[ia], 2)]
+    [br(I.AI.obs[ult]), "IDEB Anos Iniciais (" + I.anos[ult] + ")", variacao(I.AI.obs[ult], I.AI.obs[ult - 1], 1) + " · " + br(I.AI.obs[ult - 1]) + " em " + I.anos[ult - 1]],
+    [br(I.AF.obs[ult]), "IDEB Anos Finais (" + I.anos[ult] + ")", variacao(I.AF.obs[ult], I.AF.obs[ult - 1], 1) + " · " + br(I.AF.obs[ult - 1]) + " em " + I.anos[ult - 1]],
+    [br(av.pct, 0) + "%", "Avalia RJ (" + av.ano + ")", variacao(av.pct, avAnt.pct, 1) + " p.p. · " + br(avAnt.pct) + "% em " + avAnt.ano],
+    [br(D.idear.AI[ia], 2), "IDEAR Anos Iniciais (" + D.idear.anos[ia] + ")", variacao(D.idear.AI[ia], D.idear.AI[ia - 1], 2) + " · " + br(D.idear.AI[ia - 1], 2) + " em " + D.idear.anos[ia - 1]],
+    [br(D.idear.AF[ia], 2), "IDEAR Anos Finais (" + D.idear.anos[ia] + ")", variacao(D.idear.AF[ia], D.idear.AF[ia - 1], 2) + " · " + br(D.idear.AF[ia - 1], 2) + " em " + D.idear.anos[ia - 1]]
   ];
   $("#metricas").innerHTML = mets.map(function(m){ return '<div class="metrica"><div class="v">' + m[0] + '</div><div class="l">' + m[1] + '</div><div class="d">' + m[2] + "</div></div>"; }).join("");
 
@@ -98,12 +207,8 @@
   $("#atualizado").textContent = D.atualizado;
 
   function desenharTudo(){
-    desenharIdeb();
+    desenharSeries();
     colunas($("#graf-avalia"), D.avaliaRJ);
-    linhas($("#graf-idear"), D.idear.anos, [
-      { nome: "Anos Iniciais", valores: D.idear.AI, cor: cssVar("--azul2") },
-      { nome: "Anos Finais", valores: D.idear.AF, cor: cssVar("--teal") }
-    ], 2, 8, function(v){ return br(v); });
   }
   desenharTudo();
   var rz; window.addEventListener("resize", function(){ clearTimeout(rz); rz = setTimeout(desenharTudo, 150); });
