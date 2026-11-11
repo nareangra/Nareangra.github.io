@@ -26,12 +26,16 @@
         <p class="sub">Rede Municipal de Angra dos Reis</p>
       </div>
     </div>
-    <nav class="abas" role="tablist" aria-label="Seções">
-      <button role="tab" data-aba="geral" aria-selected="true">Visão geral</button>
-      <button role="tab" data-aba="ideb">IDEB</button>
-      <button role="tab" data-aba="avalia">Avalia RJ</button>
-      <button role="tab" data-aba="idear">IDEAR</button>
-      <button role="tab" data-aba="provas">Provas</button>
+    <nav class="abas" id="nav-principal" role="tablist" aria-label="Seções">
+      <button type="button" role="tab" data-aba="geral" aria-selected="true">Visão geral</button>
+      <button type="button" role="tab" data-aba="ideb">IDEB</button>
+      <button type="button" role="tab" data-aba="avalia">Avalia RJ</button>
+      <button type="button" role="tab" data-aba="idear">IDEAR</button>
+      <button type="button" role="tab" data-aba="provas">Provas</button>
+    </nav>
+    <nav class="abas subabas" id="sub-ideb" role="tablist" aria-label="Dentro do IDEB" hidden>
+      <button type="button" role="tab" data-vista="rede" aria-selected="true">IDEB</button>
+      <button type="button" role="tab" data-vista="escolas" aria-selected="false">Escolas</button>
     </nav>
   </header>
 
@@ -49,6 +53,7 @@
     </section>
 
     <section class="aba" id="aba-ideb" hidden>
+      <div id="ideb-rede">
       <h2>IDEB por etapa: observado e meta</h2>
       <p class="legenda-sec">Rede municipal de Angra dos Reis. As metas projetadas pelo INEP vão até 2021.</p>
       <div class="grade2">
@@ -67,6 +72,17 @@
       <p>IDEB = nota padronizada do SAEB (0 a 10) × indicador de fluxo (aprovação, 0 a 1). Matemática e Português são as proficiências médias no SAEB do 5º ano (Iniciais) ou do 9º ano (Finais).</p>
       <h2>O que é o IDEB</h2>
       <p>O Índice de Desenvolvimento da Educação Básica, calculado pelo INEP a cada dois anos, junta o aprendizado em Língua Portuguesa e Matemática (SAEB) com a taxa de aprovação. Fonte dos dados: <a href="https://qedu.org.br/municipio/3300100-angra-dos-reis/ideb" target="_blank" rel="noopener">QEdu</a>, com base nos resultados oficiais do INEP.</p>
+      </div>
+      <div id="ideb-escolas" hidden>
+        <div id="escolas-lista">
+          <h2 class="primeiro">Escolas da rede municipal</h2>
+          <p class="legenda-sec">Fonte: <a href="https://www.gov.br/inep/pt-br/areas-de-atuacao/pesquisas-estatisticas-e-indicadores/ideb/resultados/2005-2025" target="_blank" rel="noopener">INEP, divulgação IDEB 2025 por escola</a>.</p>
+          <input id="busca-escola" type="search" placeholder="Buscar escola" aria-label="Buscar escola" autocomplete="off" enterkeyhint="search">
+          <p class="legenda-sec" id="contagem-escolas"></p>
+          <div id="lista-escolas"></div>
+        </div>
+        <div id="escolas-detalhe" hidden></div>
+      </div>
     </section>
 
     <section class="aba" id="aba-avalia" hidden>
@@ -113,6 +129,7 @@
   </main>
 
   <script src="data.js"></script>
+  <script src="escolas.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

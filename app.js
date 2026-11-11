@@ -154,7 +154,10 @@
   }
 
   var I = D.ideb;
-  function situacao(o, m){ if (m === null) return "—"; return o >= m ? '<span class="ok">Atingiu</span>' : '<span class="abaixo">Abaixo</span>'; }
+  function situacao(o, m){
+    if (o === null || o === undefined || m === null || m === undefined || !isFinite(o) || !isFinite(m)) return "—";
+    return o >= m ? '<span class="ok">Atingiu</span>' : '<span class="abaixo">Abaixo</span>';
+  }
 
   function desenharSeries(){
     document.querySelectorAll("[data-grafico]").forEach(function(g){
@@ -270,6 +273,7 @@
 
   $("#props-idear").innerHTML = D.idear.metas2025.map(function(p){ return "<dt>" + p[0] + "</dt><dd>" + p[1] + "</dd>"; }).join("");
 
+  D.fontes.push({ titulo: "Divulgação IDEB 2025 por escola", site: "INEP", url: "https://www.gov.br/inep/pt-br/areas-de-atuacao/pesquisas-estatisticas-e-indicadores/ideb/resultados/2005-2025" });
   $("#links-fontes").innerHTML = D.fontes.map(function(f){ return '<a href="' + f.url + '" target="_blank" rel="noopener">' + f.titulo + "<small>" + f.site + "</small></a>"; }).join("");
   $("#atualizado").textContent = D.atualizado;
 
@@ -278,22 +282,283 @@
     colunas($("#graf-avalia"), D.avaliaRJ);
     desenharColuna("AI");
     desenharColuna("AF");
+    if (vistaEscola) desenharVistaEscola();
   }
   desenharTudo();
   var rz; window.addEventListener("resize", function(){ clearTimeout(rz); rz = setTimeout(desenharTudo, 150); });
   if (window.matchMedia) { var mq = window.matchMedia("(prefers-color-scheme: dark)"); if (mq.addEventListener) mq.addEventListener("change", desenharTudo); }
 
-  /* Abas (com #hash para links diretos) */
-  var abas = document.querySelectorAll(".abas button");
-  function abrir(id, rolar){
-    if (!document.getElementById("aba-" + id)) id = "geral";
+  /* Escolas: mesmos componentes do IDEB municipal, com os números do INEP. */
+  var FONTE_INEP = "https://www.gov.br/inep/pt-br/areas-de-atuacao/pesquisas-estatisticas-e-indicadores/ideb/resultados/2005-2025";
+  var COLS_ESC = [
+    { chave: "obs", nome: "IDEB" },
+    { chave: "meta", nome: "Meta" },
+    { chave: "aprend", nome: "Nota padronizada (SAEB)" },
+    { chave: "fluxo", nome: "Fluxo / Rendimento" },
+    { chave: "mt", nome: "Matemática" },
+    { chave: "lp", nome: "Português" },
+    { chave: "aprov", nome: "Aprovação", sufixo: "%" }
+  ];
+  var colSelEsc = { AI: null, AF: null };
+  var serieEsc = { AI: null, AF: null };
+  var vistaEscola = null;
+  var buscaEscola = "";
+  function semAcento(s){ return String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(); }
+  function slugEscola(nome){ return semAcento(nome).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
+  function idEscola(e){ return e.inep || slugEscola(e.nome); }
+  function htmlEsc(s){ return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+  function acharEscola(id){
+    try { id = decodeURIComponent(id); } catch (err) {}
+    var lista = window.ESCOLAS || [];
+    for (var i = 0; i < lista.length; i++) if (idEscola(lista[i]) === id) return lista[i];
+    return null;
+  }
+  function escolasOrdenadas(){
+    return (window.ESCOLAS || []).slice().sort(function(a, b){ return a.nome.localeCompare(b.nome, "pt"); });
+  }
+  function blocoParaSerie(bloco){
+    if (!bloco) return null;
+    var anos = Object.keys(bloco).sort();
+    function pegar(campo){
+      return anos.map(function(a){
+        var v = bloco[a][campo];
+        return v === null || v === undefined || !isFinite(v) ? null : v;
+      });
+    }
+    return { anos: anos, obs: pegar("ideb"), meta: pegar("meta"), aprend: pegar("nota_padronizada"), fluxo: pegar("rendimento"), mt: pegar("matematica"), lp: pegar("portugues"), aprov: pegar("aprovacao") };
+  }
+  function fmtCampo(chave, v){
+    if (v === null || v === undefined || !isFinite(v)) return "—";
+    if (chave === "obs" || chave === "meta" || chave === "aprov") return br(v, 1);
+    return String(v).replace(".", ",");
+  }
+  function ultimoIdeb(bloco){
+    if (!bloco) return null;
+    var prev = null, last = null;
+    Object.keys(bloco).sort().forEach(function(a){
+      var v = bloco[a].ideb;
+      if (v === null || v === undefined || !isFinite(v)) return;
+      prev = last;
+      last = { ano: a, v: v };
+    });
+    return last ? { atual: last, anterior: prev } : null;
+  }
+  function selosEscola(e){
+    if (e.status === "sem resultados") return '<span class="selo vazio">Sem resultados</span>';
+    var html = "";
+    [["iniciais", "Iniciais"], ["finais", "Finais"]].forEach(function(par){
+      var info = ultimoIdeb(e[par[0]]);
+      if (info) html += '<span class="selo">' + par[1] + " " + br(info.atual.v, 1) + " · " + info.atual.ano + "</span>";
+    });
+    return html || '<span class="selo vazio">Sem resultados</span>';
+  }
+  function pintarLista(){
+    var html = "";
+    escolasOrdenadas().forEach(function(e){
+      var id = idEscola(e);
+      var busca = semAcento(e.nome + " " + (e.inep || ""));
+      html += '<button type="button" class="escola" data-escola="' + htmlEsc(id) + '" data-busca="' + htmlEsc(busca) + '"><span class="nome">' + htmlEsc(e.nome) + '</span><span class="selos">' + selosEscola(e) + "</span></button>";
+    });
+    $("#lista-escolas").innerHTML = html;
+    filtrarLista();
+  }
+  function filtrarLista(){
+    var q = semAcento(buscaEscola.trim());
+    var vis = 0, total = 0;
+    document.querySelectorAll("#lista-escolas .escola").forEach(function(b){
+      total++;
+      var mostra = !q || b.getAttribute("data-busca").indexOf(q) !== -1;
+      b.hidden = !mostra;
+      if (mostra) vis++;
+    });
+    var cont = $("#contagem-escolas");
+    if (cont) cont.textContent = q ? (vis + " de " + total + " escolas") : (total + " escolas");
+  }
+  function mostrarLista(){
+    vistaEscola = null;
+    $("#escolas-detalhe").hidden = true;
+    $("#escolas-lista").hidden = false;
+    if (!$("#lista-escolas").childElementCount) pintarLista();
+    var campo = $("#busca-escola");
+    if (campo && campo.value !== buscaEscola) campo.value = buscaEscola;
+    filtrarLista();
+  }
+  function escalaIdeb(obs, meta){
+    var vals = [];
+    obs.concat(meta).forEach(function(v){ if (v !== null && v !== undefined && isFinite(v)) vals.push(v); });
+    if (!vals.length) return null;
+    var lo = Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
+    if (lo >= 3 && hi <= 7) return [3, 7];
+    return faixa(vals);
+  }
+  function montarTabelaEsc(et, serie){
+    var nome = etapaNome(et);
+    var h = "<thead><tr><th>Edição</th>";
+    COLS_ESC.forEach(function(col){
+      h += '<th data-col="' + col.chave + '"><button type="button" class="col-btn" data-col="' + col.chave + '" data-etapa="' + et + '" aria-pressed="false" aria-controls="graf-col-esc-' + et + '" aria-label="Ver gráfico de ' + col.nome + ", " + nome + '">' + ICO + "<span>" + col.nome + "</span></button></th>";
+    });
+    h += "<th>Situação</th></tr></thead><tbody>";
+    serie.anos.forEach(function(a, i){
+      h += "<tr><td>" + a + "</td>";
+      COLS_ESC.forEach(function(col){
+        var texto = fmtCampo(col.chave, serie[col.chave][i]);
+        if (texto !== "—" && col.sufixo) texto += col.sufixo;
+        h += '<td data-col="' + col.chave + '">' + texto + "</td>";
+      });
+      h += "<td>" + situacao(serie.obs[i], serie.meta[i]) + "</td></tr>";
+    });
+    $("#tab-esc-" + et).innerHTML = h + "</tbody>";
+  }
+  function desenharGraficoEsc(et){
+    var serie = serieEsc[et];
+    var alvo = document.querySelector('[data-grafico="esc-' + et + '"]');
+    if (!alvo || !serie) return;
+    var lim = escalaIdeb(serie.obs, serie.meta);
+    if (!lim) { alvo.innerHTML = '<p class="legenda-sec">Sem IDEB ou meta publicados nesta etapa.</p>'; return; }
+    linhas(alvo, serie.anos, [
+      { nome: "IDEB observado", valores: serie.obs, cor: cssVar("--azul2") },
+      { nome: "Meta", valores: serie.meta, cor: cssVar("--meta"), tracejado: true }
+    ], lim[0], lim[1], function(v){ return br(v, 1); });
+  }
+  function desenharColunaEsc(et){
+    var tabelaEl = $("#tab-esc-" + et), box = $("#graf-col-esc-" + et), chave = colSelEsc[et], serie = serieEsc[et];
+    if (!tabelaEl || !box || !serie) return;
+    tabelaEl.querySelectorAll("th, td").forEach(function(cell){
+      var on = !!chave && cell.getAttribute("data-col") === chave;
+      cell.classList.toggle("col-ativa", on);
+      var b = cell.querySelector("button");
+      if (b) b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    if (!chave) { box.hidden = true; box.innerHTML = ""; return; }
+    var col = null;
+    COLS_ESC.forEach(function(item){ if (item.chave === chave) col = item; });
+    var anos = [], vals = [];
+    serie.anos.forEach(function(a, i){
+      var v = serie[chave][i];
+      if (v === null || !isFinite(v)) return;
+      anos.push(a); vals.push(v);
+    });
+    box.hidden = false;
+    box.innerHTML = "<h3></h3><div class=\"alvo\"></div>";
+    box.querySelector("h3").textContent = col.nome + " · " + etapaNome(et);
+    if (!vals.length) { box.querySelector(".alvo").innerHTML = '<p class="legenda-sec">Sem valores publicados nesta coluna.</p>'; return; }
+    var lim = faixa(vals);
+    linhas(box.querySelector(".alvo"), anos, [
+      { nome: col.nome, valores: vals, cor: et === "AF" ? cssVar("--teal") : cssVar("--azul2") }
+    ], lim[0], lim[1], function(v){ var t = fmtCampo(chave, v); return t + (col.sufixo || ""); }, function(v){
+      var a = Math.abs(v);
+      return br(v, a >= 20 ? 0 : a >= 2 ? 1 : 2);
+    });
+  }
+  function desenharVistaEscola(){
+    if (!vistaEscola) return;
+    desenharGraficoEsc("AI");
+    desenharGraficoEsc("AF");
+    desenharColunaEsc("AI");
+    desenharColunaEsc("AF");
+  }
+  function secaoEtapa(et, bloco){
+    if (!bloco) return "";
+    var nome = etapaNome(et);
+    var info = ultimoIdeb(bloco);
+    var cards = "";
+    if (info) {
+      var det = info.anterior ? variacao(info.atual.v, info.anterior.v, 1) + " · " + br(info.anterior.v, 1) + " em " + info.anterior.ano : "Sem edição anterior";
+      cards = '<div class="metricas"><div class="metrica"><div class="v">' + br(info.atual.v, 1) + '</div><div class="l">IDEB ' + nome + " (" + info.atual.ano + ')</div><div class="d">' + det + "</div></div></div>";
+    }
+    return "<h2>" + nome + "</h2>" + cards +
+      '<div class="cartao"><h3>Evolução do IDEB</h3><div data-grafico="esc-' + et + '"></div></div>' +
+      '<p class="legenda-sec">Toque o título de uma coluna numérica para ver a evolução. Toque de novo para fechar.</p>' +
+      '<div class="tabela-wrap"><table id="tab-esc-' + et + '"></table></div>' +
+      '<div class="cartao col-grafico" id="graf-col-esc-' + et + '" hidden></div>';
+  }
+  function pintarDetalhe(e){
+    serieEsc.AI = blocoParaSerie(e.iniciais);
+    serieEsc.AF = blocoParaSerie(e.finais);
+    var corpo = secaoEtapa("AI", e.iniciais) + secaoEtapa("AF", e.finais);
+    if (!corpo) corpo = '<p class="aviso">Sem resultados.</p><p>Não há IDEB publicado para esta escola na divulgação do INEP.</p>';
+    var inep = e.inep ? '<p class="legenda-sec">Código INEP ' + htmlEsc(e.inep) + " · rede municipal</p>" : '<p class="legenda-sec">Rede municipal</p>';
+    $("#escolas-detalhe").innerHTML =
+      '<button type="button" class="voltar" id="btn-voltar-escolas">← Escolas</button>' +
+      '<h2 class="primeiro">' + htmlEsc(e.nome) + "</h2>" + inep + corpo +
+      '<p class="legenda-sec">Fonte: <a href="' + FONTE_INEP + '" target="_blank" rel="noopener">INEP, divulgação IDEB 2025 por escola</a>.</p>';
+    if (serieEsc.AI) montarTabelaEsc("AI", serieEsc.AI);
+    if (serieEsc.AF) montarTabelaEsc("AF", serieEsc.AF);
+  }
+  function abrirEscola(e){
+    var mesmo = vistaEscola && idEscola(vistaEscola) === idEscola(e);
+    vistaEscola = e;
+    $("#escolas-lista").hidden = true;
+    $("#escolas-detalhe").hidden = false;
+    if (!mesmo || !$("#escolas-detalhe").querySelector("h2")) {
+      colSelEsc.AI = null;
+      colSelEsc.AF = null;
+      pintarDetalhe(e);
+    }
+    desenharVistaEscola();
+  }
+  $("#ideb-escolas").addEventListener("click", function(ev){
+    var t = ev.target;
+    var col = t.closest ? t.closest("button[data-col]") : null;
+    if (col) {
+      var et = col.getAttribute("data-etapa");
+      var chave = col.getAttribute("data-col");
+      colSelEsc[et] = colSelEsc[et] === chave ? null : chave;
+      desenharColunaEsc(et);
+      if (colSelEsc[et]) $("#graf-col-esc-" + et).scrollIntoView({ block: "nearest", inline: "nearest" });
+      return;
+    }
+    var escolaBtn = t.closest ? t.closest("button[data-escola]") : null;
+    if (escolaBtn) { location.hash = "#ideb/escolas/" + escolaBtn.getAttribute("data-escola"); return; }
+    if (t.closest && t.closest("#btn-voltar-escolas")) location.hash = "#ideb/escolas";
+  });
+  $("#busca-escola").addEventListener("input", function(){ buscaEscola = this.value; filtrarLista(); });
+
+  /* Abas e rotas #ideb/escolas/<inep ou slug> */
+  var abas = document.querySelectorAll("#nav-principal button");
+  function aplicarRota(rolar){
+    var partes = (location.hash || "#geral").replace(/^#/, "").split("/");
+    var id = partes[0] || "geral";
+    if (!document.getElementById("aba-" + id)) { id = "geral"; partes = ["geral"]; }
     abas.forEach(function(b){ b.setAttribute("aria-selected", b.getAttribute("data-aba") === id ? "true" : "false"); });
     document.querySelectorAll(".aba").forEach(function(s){ s.hidden = s.id !== "aba-" + id; });
+    var sub = $("#sub-ideb");
+    if (sub) sub.hidden = id !== "ideb";
+    var escolas = id === "ideb" && partes[1] === "escolas";
+    var rede = $("#ideb-rede"), painel = $("#ideb-escolas");
+    if (rede) rede.hidden = escolas;
+    if (painel) painel.hidden = !escolas;
+    document.querySelectorAll("#sub-ideb button").forEach(function(b){
+      var on = (escolas && b.getAttribute("data-vista") === "escolas") || (!escolas && b.getAttribute("data-vista") === "rede");
+      b.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    if (escolas) {
+      var cod = partes.slice(2).join("/");
+      if (cod) {
+        var encontrada = acharEscola(cod);
+        if (encontrada) abrirEscola(encontrada);
+        else { mostrarLista(); var cont = $("#contagem-escolas"); if (cont) cont.textContent = "Escola não encontrada. " + cont.textContent; }
+      } else mostrarLista();
+    } else vistaEscola = null;
     desenharTudo();
     if (rolar) window.scrollTo(0, 0);
   }
-  abas.forEach(function(b){ b.addEventListener("click", function(){ var id = b.getAttribute("data-aba"); history.replaceState(null, "", "#" + id); abrir(id, true); }); });
-  abrir((location.hash || "#geral").slice(1), false);
+  abas.forEach(function(b){
+    b.addEventListener("click", function(){
+      var next = "#" + b.getAttribute("data-aba");
+      if (location.hash !== next) location.hash = next;
+      else aplicarRota(true);
+    });
+  });
+  document.querySelectorAll("#sub-ideb button").forEach(function(b){
+    b.addEventListener("click", function(){
+      var next = b.getAttribute("data-vista") === "escolas" ? "#ideb/escolas" : "#ideb";
+      if (location.hash !== next) location.hash = next;
+      else aplicarRota(true);
+    });
+  });
+  window.addEventListener("hashchange", function(){ aplicarRota(true); });
+  aplicarRota(false);
 
   if ("serviceWorker" in navigator) { window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); }); }
 })();
