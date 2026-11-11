@@ -16,8 +16,11 @@ a{color:var(--azul2)}
 h1{font-size:1.15rem;margin:0;line-height:1.2}
 .sub{margin:2px 0 0;font-size:.9rem;opacity:.9}
 .abas{max-width:1180px;margin:12px auto 0;display:flex;flex-wrap:wrap;gap:6px;padding-bottom:12px}
+.abas[hidden]{display:none}
+.subabas{margin-top:0;padding-top:0}
 .abas button{flex:1 1 auto;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);color:#fff;font:inherit;font-size:.9rem;padding:8px 12px;border-radius:999px;cursor:pointer}
 .abas button[aria-selected="true"]{background:#fff;color:var(--azul);font-weight:600}
+#sub-ideb button[data-vista="escolas"]{margin-left:8px}
 main{max-width:1180px;margin:0 auto;padding:16px 16px calc(env(safe-area-inset-bottom) + 32px)}
 h2{font-size:1.1rem;margin:28px 0 10px}
 h3{font-size:.95rem;margin:0 0 12px;color:var(--texto2);font-weight:600}
@@ -45,6 +48,16 @@ th.col-ativa,td.col-ativa{background:color-mix(in srgb, var(--azul2) 12%, transp
 .col-grafico{margin-top:12px}
 .col-grafico h3{color:var(--texto);font-size:1rem}
 h3.etapa-tab{margin-top:22px}
+h2.primeiro{margin-top:4px}
+.busca,#busca-escola{display:block;width:100%;font:inherit;font-size:1rem;padding:12px 14px;border-radius:12px;border:1px solid var(--borda);background:var(--papel);color:var(--texto);margin:0 0 8px}
+.lista-escolas,#lista-escolas{display:grid;gap:8px}
+.escola{display:block;width:100%;text-align:left;font:inherit;color:var(--texto);background:var(--papel);border:1px solid var(--borda);border-radius:14px;padding:12px 14px;cursor:pointer}
+.escola[hidden]{display:none}
+.escola .nome{display:block;font-weight:650;line-height:1.3}
+.selos{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.selo{font-size:.75rem;font-weight:650;background:color-mix(in srgb, var(--azul2) 14%, transparent);color:var(--azul2);border-radius:999px;padding:3px 8px}
+.selo.vazio{background:transparent;color:var(--texto2);border:1px solid var(--borda);font-weight:600}
+.voltar{border:1px solid var(--borda);background:var(--papel);color:var(--texto);font:inherit;font-size:.95rem;border-radius:999px;padding:8px 14px;cursor:pointer}
 .ok{color:var(--ok);font-weight:600}.abaixo{color:var(--alerta);font-weight:600}
 .titulo-acao{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:28px}
 .titulo-acao h2{margin:0}
