@@ -81,28 +81,31 @@
         var texto = fmt(v);
         var metaV = metaS ? metaS.valores[i] : null;
         var metaAcima = metaV !== null && metaV !== undefined && isFinite(metaV) && metaV > v;
-        var acima = -(fs + 6), abaixo = fs + 12;
-        var cands = [];
-        function add(dy, anchor, dx){ cands.push({ dy: dy, anchor: anchor, dx: dx || 0 }); }
-        if (i === 0) { add(acima, "start", 7); add(abaixo, "start", 7); }
-        else if (i === n - 1) { add(acima, "end", -7); add(abaixo, "end", -7); }
-        if (metaAcima) { add(abaixo, "middle"); add(acima, "middle"); }
-        else { add(acima, "middle"); add(abaixo, "middle"); }
-        add(metaAcima ? abaixo + fs + 4 : acima - (fs + 3), "middle");
-        add(metaAcima ? acima - (fs + 3) : abaixo + fs + 4, "middle");
-        if (i !== 0 && i !== n - 1) { add(acima, "start", 7); add(acima, "end", -7); add(abaixo, "start", 7); add(abaixo, "end", -7); }
         var node = el("text", { "font-size": fs, "font-weight": 700, fill: s.cor }, texto);
         svg.appendChild(node);
         var len = 0;
         try { len = node.getComputedTextLength(); } catch (err) { len = 0; }
         if (!len) len = texto.length * fs * 0.62;
-        var th = fs * 0.82;
+        var espacoPts = n <= 1 ? W : (W - L - R) / Math.max(1, n - 1);
+        var apertado = len + 8 > espacoPts;
+        var acima = -(fs + 6), abaixo = fs + 12;
+        var preferAbaixo = metaAcima || (apertado && i % 2 === 1);
+        var cands = [];
+        function add(dy, anchor, dx){ cands.push({ dy: dy, anchor: anchor, dx: dx || 0 }); }
+        if (i === 0) { add(preferAbaixo ? abaixo : acima, "start", 6); add(preferAbaixo ? acima : abaixo, "start", 6); }
+        else if (i === n - 1) { add(preferAbaixo ? abaixo : acima, "end", -6); add(preferAbaixo ? acima : abaixo, "end", -6); }
+        if (preferAbaixo) { add(abaixo, "middle"); add(acima, "middle"); }
+        else { add(acima, "middle"); add(abaixo, "middle"); }
+        add(preferAbaixo ? abaixo + fs + 6 : acima - (fs + 4), "middle");
+        add(preferAbaixo ? acima - (fs + 4) : abaixo + fs + 6, "middle");
+        if (i !== 0 && i !== n - 1) { add(acima, "end", -8); add(acima, "start", 8); add(abaixo, "end", -8); add(abaixo, "start", 8); }
+        var th = fs + 3;
         var chosen = null;
         for (var c = 0; c < cands.length; c++){
           var cd = cands[c];
           var cx = x(i) + cd.dx, cy = y(v) + cd.dy;
           var x1 = cd.anchor === "start" ? cx : cd.anchor === "end" ? cx - len : cx - len / 2;
-          var b = { x1: x1 - 1.5, y1: cy - th, x2: x1 + len + 1.5, y2: cy + 2 };
+          var b = { x1: x1 - 3, y1: cy - th, x2: x1 + len + 3, y2: cy + 3 };
           if (b.x1 < 1 || b.x2 > W - 1 || b.y1 < 1 || b.y2 > H - 20) continue;
           if (hit(b) || cruzaMeta(b) || cruzaEixo(b)) continue;
           if (x(i) >= b.x1 && x(i) <= b.x2 && y(v) >= b.y1 && y(v) <= b.y2) continue;
@@ -113,7 +116,7 @@
           var fb = cands[0];
           var cx2 = x(i) + fb.dx, cy2 = Math.min(H - 22, Math.max(th + 1, y(v) + fb.dy));
           var x1b = fb.anchor === "start" ? cx2 : fb.anchor === "end" ? cx2 - len : cx2 - len / 2;
-          chosen = { cx: cx2, cy: cy2, anchor: fb.anchor, b: { x1: x1b - 1.5, y1: cy2 - th, x2: x1b + len + 1.5, y2: cy2 + 2 } };
+          chosen = { cx: cx2, cy: cy2, anchor: fb.anchor, b: { x1: x1b - 3, y1: cy2 - th, x2: x1b + len + 3, y2: cy2 + 3 } };
         }
         node.setAttribute("x", chosen.cx);
         node.setAttribute("y", chosen.cy);
@@ -186,17 +189,81 @@
   ];
   $("#metricas").innerHTML = mets.map(function(m){ return '<div class="metrica"><div class="v">' + m[0] + '</div><div class="l">' + m[1] + '</div><div class="d">' + m[2] + "</div></div>"; }).join("");
 
-  tabela($("#tab-ideb"), ["Edição", "Iniciais", "Meta", "Situação", "Finais", "Meta", "Situação"],
-    I.anos.map(function(a, i){ return [a, br(I.AI.obs[i]), br(I.AI.meta[i]), situacao(I.AI.obs[i], I.AI.meta[i]), br(I.AF.obs[i]), br(I.AF.meta[i]), situacao(I.AF.obs[i], I.AF.meta[i])]; }));
-
-  function comp(et){
-    var c = I[et];
-    tabela($("#tab-comp"), ["Edição", "Nota padronizada", "Fluxo", "Matemática", "Português", "Aprovação"],
-      I.anos.map(function(a, i){ return [a, br(c.aprend[i], 2), br(c.fluxo[i], 2), br(c.mt[i], 1), br(c.lp[i], 1), br(c.aprov[i], 1) + "%"]; }));
-    document.querySelectorAll("#seg-comp button").forEach(function(b){ b.setAttribute("aria-pressed", b.getAttribute("data-etapa") === et ? "true" : "false"); });
+  /* Colunas numéricas já presentes em data.js. Situação não é série numérica. */
+  var COLS = [
+    { chave: "obs", nome: "IDEB", casas: 1 },
+    { chave: "meta", nome: "Meta", casas: 1 },
+    { chave: "aprend", nome: "Nota padronizada (SAEB)", casas: 2 },
+    { chave: "fluxo", nome: "Fluxo / Rendimento", casas: 2 },
+    { chave: "mt", nome: "Matemática", casas: 1 },
+    { chave: "lp", nome: "Português", casas: 1 },
+    { chave: "aprov", nome: "Aprovação", casas: 1, sufixo: "%" }
+  ];
+  var ICO = '<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M1.5 12.5h13M3 10.2l3.2-3.1 2.4 2.1L13 4.2" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var colSel = { AI: null, AF: null };
+  function etapaNome(et){ return et === "AF" ? "Anos Finais" : "Anos Iniciais"; }
+  function fmtCol(v, col){ return br(v, col.casas) + (col.sufixo || ""); }
+  function faixa(vals){
+    var lo = vals[0], hi = vals[0];
+    vals.forEach(function(v){ if (v < lo) lo = v; if (v > hi) hi = v; });
+    var span = hi - lo;
+    if (!(span > 1e-9)) span = Math.abs(hi) > 1 ? Math.abs(hi) * 0.08 : 0.5;
+    var pad = span * 0.22;
+    return [lo - pad, hi + pad];
   }
-  document.querySelectorAll("#seg-comp button").forEach(function(b){ b.addEventListener("click", function(){ comp(b.getAttribute("data-etapa")); }); });
-  comp("AI");
+  function montarTabela(et){
+    var c = I[et], nome = etapaNome(et);
+    var h = "<thead><tr><th>Edição</th>";
+    COLS.forEach(function(col){
+      h += '<th data-col="' + col.chave + '"><button type="button" class="col-btn" data-col="' + col.chave + '" aria-pressed="false" aria-controls="graf-col-' + et + '" aria-label="Ver gráfico de ' + col.nome + ', ' + nome + '">' + ICO + "<span>" + col.nome + "</span></button></th>";
+    });
+    h += '<th>Situação</th></tr></thead><tbody>';
+    I.anos.forEach(function(a, i){
+      h += "<tr><td>" + a + "</td>";
+      COLS.forEach(function(col){
+        h += '<td data-col="' + col.chave + '">' + fmtCol(c[col.chave][i], col) + "</td>";
+      });
+      h += "<td>" + situacao(c.obs[i], c.meta[i]) + "</td></tr>";
+    });
+    $("#tab-" + et).innerHTML = h + "</tbody>";
+  }
+  function desenharColuna(et){
+    var tabelaEl = $("#tab-" + et), box = $("#graf-col-" + et), chave = colSel[et];
+    tabelaEl.querySelectorAll("th, td").forEach(function(cell){
+      var on = !!chave && cell.getAttribute("data-col") === chave;
+      cell.classList.toggle("col-ativa", on);
+      var b = cell.querySelector("button");
+      if (b) b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    if (!chave) { box.hidden = true; box.innerHTML = ""; return; }
+    var col = null;
+    COLS.forEach(function(item){ if (item.chave === chave) col = item; });
+    var anos = [], vals = [];
+    I.anos.forEach(function(a, i){
+      var v = I[et][chave][i];
+      if (v === null || !isFinite(v)) return;
+      anos.push(a); vals.push(v);
+    });
+    box.hidden = false;
+    box.innerHTML = "<h3></h3><div class=\"alvo\"></div>";
+    box.querySelector("h3").textContent = col.nome + " · " + etapaNome(et);
+    if (!vals.length) return;
+    var lim = faixa(vals);
+    linhas(box.querySelector(".alvo"), anos, [
+      { nome: col.nome, valores: vals, cor: et === "AF" ? cssVar("--teal") : cssVar("--azul2") }
+    ], lim[0], lim[1], function(v){ return fmtCol(v, col); }, function(v){ return br(v, col.casas > 1 ? 2 : (col.chave === "mt" || col.chave === "lp" || col.chave === "aprov" ? 0 : col.casas)); });
+  }
+  ["AI", "AF"].forEach(function(et){
+    montarTabela(et);
+    $("#tab-" + et).addEventListener("click", function(ev){
+      var btn = ev.target.closest ? ev.target.closest("button[data-col]") : null;
+      if (!btn) return;
+      var chave = btn.getAttribute("data-col");
+      colSel[et] = colSel[et] === chave ? null : chave;
+      desenharColuna(et);
+      if (colSel[et]) $("#graf-col-" + et).scrollIntoView({ block: "nearest", inline: "nearest" });
+    });
+  });
 
   tabela($("#tab-avalia"), ["Ano", "Alfabetizados", "Meta", "Participação", "Alunos"],
     D.avaliaRJ.map(function(x){ return [x.ano, br(x.pct) + "%", x.meta === null ? "Sem meta" : br(x.meta) + "%", br(x.part) + "%", x.alunos.toLocaleString("pt-BR")]; }));
@@ -209,6 +276,8 @@
   function desenharTudo(){
     desenharSeries();
     colunas($("#graf-avalia"), D.avaliaRJ);
+    desenharColuna("AI");
+    desenharColuna("AF");
   }
   desenharTudo();
   var rz; window.addEventListener("resize", function(){ clearTimeout(rz); rz = setTimeout(desenharTudo, 150); });
