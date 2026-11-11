@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Indicadores Educacionais – Rede Municipal de Angra dos Reis</title>
+  <meta name="description" content="Painel com os resultados da rede municipal de ensino de Angra dos Reis (RJ) no IDEB, no Avalia RJ e no IDEAR.">
+  <meta name="theme-color" content="#00437f">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="favicon.ico" sizes="any">
+  <link rel="icon" href="icons/favicon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" sizes="180x180">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Indicadores Angra">
+  <meta name="application-name" content="Indicadores Angra">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="topo-inner">
+      <img src="icons/logo-96.png" alt="" width="48" height="48" class="logo">
+      <div>
+        <h1>Indicadores Educacionais</h1>
+        <p class="sub">Rede Municipal de Angra dos Reis</p>
+      </div>
+    </div>
+    <nav class="abas" role="tablist" aria-label="Seções">
+      <button role="tab" data-aba="geral" aria-selected="true">Visão geral</button>
+      <button role="tab" data-aba="ideb">IDEB</button>
+      <button role="tab" data-aba="avalia">Avalia RJ</button>
+      <button role="tab" data-aba="idear">IDEAR</button>
+      <button role="tab" data-aba="provas">Provas</button>
+    </nav>
+  </header>
+
+  <main id="conteudo">
+    <section class="aba" id="aba-geral">
+      <p class="lead">Painel com os resultados da rede municipal de ensino de Angra dos Reis (RJ) no IDEB, no Avalia RJ e no IDEAR. Os resultados mais recentes mostram avanço nas três avaliações.</p>
+      <div class="metricas" id="metricas"></div>
+      <h2>Evolução do IDEB</h2>
+      <div class="grade2">
+        <div class="cartao"><h3>Anos Iniciais (1º ao 5º ano)</h3><div data-grafico="ideb-AI"></div></div>
+        <div class="cartao"><h3>Anos Finais (6º ao 9º ano)</h3><div data-grafico="ideb-AF"></div></div>
+      </div>
+      <h2>Como navegar</h2>
+      <p>Use os botões no topo para abrir cada indicador. No celular, role a página para ver gráficos e tabelas; tabelas largas podem ser arrastadas para o lado. Para instalar no celular, use "Adicionar à tela inicial" no menu do navegador.</p>
+    </section>
+
+    <section class="aba" id="aba-ideb" hidden>
+      <h2>IDEB por etapa: observado e meta</h2>
+      <p class="legenda-sec">Rede municipal de Angra dos Reis. As metas projetadas pelo INEP vão até 2021.</p>
+      <div class="grade2">
+        <div class="cartao"><h3>Anos Iniciais</h3><div data-grafico="ideb-AI"></div></div>
+        <div class="cartao"><h3>Anos Finais</h3><div data-grafico="ideb-AF"></div></div>
+      </div>
+      <h2>Todas as edições</h2>
+      <div class="tabela-wrap"><table id="tab-ideb"></table></div>
+      <p>A rede municipal não tem resultado de 2005 publicado no QEdu. Depois de 2021 não há novas metas oficiais; em 2023 e 2025 o resultado pode ser comparado à última meta (2021).</p>
+      <div class="titulo-acao">
+        <h2>Componentes do IDEB</h2>
+        <div class="seg" id="seg-comp">
+          <button data-etapa="AI" aria-pressed="true">Iniciais</button>
+          <button data-etapa="AF" aria-pressed="false">Finais</button>
+        </div>
+      </div>
+      <div class="tabela-wrap"><table id="tab-comp"></table></div>
+      <p>IDEB = nota padronizada do SAEB (0 a 10) × indicador de fluxo (aprovação, 0 a 1). Matemática e Português são as proficiências médias no SAEB do 5º ano (Iniciais) ou do 9º ano (Finais).</p>
+      <h2>O que é o IDEB</h2>
+      <p>O Índice de Desenvolvimento da Educação Básica, calculado pelo INEP a cada dois anos, junta o aprendizado em Língua Portuguesa e Matemática (SAEB) com a taxa de aprovação. Fonte dos dados: <a href="https://qedu.org.br/municipio/3300100-angra-dos-reis/ideb" target="_blank" rel="noopener">QEdu</a>, com base nos resultados oficiais do INEP.</p>
+    </section>
+
+    <section class="aba" id="aba-avalia" hidden>
+      <h2>Crianças alfabetizadas no 2º ano (Avalia RJ)</h2>
+      <p class="legenda-sec">Percentual de alunos alfabetizados ao final do 2º ano, rede municipal.</p>
+      <div class="grade2">
+        <div class="cartao"><h3>Alfabetizados por ano</h3><div id="graf-avalia"></div></div>
+        <div class="cartao"><h3>Resultado e meta</h3><div class="tabela-wrap"><table id="tab-avalia"></table></div></div>
+      </div>
+      <h2>Sobre o Avalia RJ</h2>
+      <p>O Avalia RJ é a avaliação estadual do Rio de Janeiro. Seus resultados de Língua Portuguesa do 2º ano compõem o Indicador Criança Alfabetizada (ICA), calculado em cooperação com o INEP no Compromisso Nacional Criança Alfabetizada. Em 2025 a rede municipal chegou a 64% de alunos alfabetizados, a 1 ponto da meta de 65%.</p>
+      <p>Fonte: <a href="https://qedu.org.br/uf/33-rio-de-janeiro/explore?aba=alfabetizacao&amp;cidade=angra-dos-reis" target="_blank" rel="noopener">QEdu – Alfabetização</a></p>
+    </section>
+
+    <section class="aba" id="aba-idear" hidden>
+      <h2>Média do IDEAR na rede municipal</h2>
+      <div class="cartao"><div id="graf-idear"></div></div>
+      <h2>Resultados de 2025</h2>
+      <dl class="props" id="props-idear"></dl>
+      <h2>O que é o IDEAR</h2>
+      <p>O Índice de Desenvolvimento da Educação de Angra dos Reis é um indicador próprio do município, calculado a partir das avaliações formativas e somativas de Língua Portuguesa e Matemática do sistema AVALIAR da rede municipal. Cada escola recebe metas anuais com base nos seus resultados anteriores. Em 2026 foi lançado o IDEAR-ALFA, voltado ao 2º ano.</p>
+      <p>Fonte: <a href="https://angra.rj.gov.br/noticias/06-03-2026/angra-entrega-metas-da-educacao-para-escolas-municipais-em-2026-e-lanca-idear-alfa" target="_blank" rel="noopener">angra.rj.gov.br, 06/03/2026</a></p>
+    </section>
+
+    <section class="aba" id="aba-provas" hidden>
+      <h2>Exemplos de provas</h2>
+      <p>Esta área vai reunir exemplos de provas e itens das avaliações acompanhadas pelo painel, para que famílias, estudantes e professores conheçam o formato de cada uma.</p>
+      <ol class="passos">
+        <li><strong>Seleção do material</strong><span>A Secretaria escolhe provas e itens já liberados para divulgação.</span></li>
+        <li><strong>Organização por avaliação</strong><span>Os exemplos ficam separados por SAEB/IDEB, Avalia RJ e AVALIAR/IDEAR, e por ano escolar.</span></li>
+        <li><strong>Publicação no painel</strong><span>Cada exemplo traz a habilidade avaliada e o link para o material completo.</span></li>
+      </ol>
+    </section>
+
+    <section class="fontes">
+      <h2>Fontes</h2>
+      <div class="links" id="links-fontes"></div>
+      <p class="aviso">Painel de acompanhamento dos indicadores da rede municipal, montado a partir de fontes públicas. Não é um site oficial da Prefeitura. Dados atualizados em <span id="atualizado"></span>.</p>
+    </section>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

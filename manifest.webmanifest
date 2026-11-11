@@ -1,0 +1,19 @@
+{
+  "name": "Indicadores Educacionais de Angra",
+  "short_name": "Indicadores Angra",
+  "description": "Painel com os resultados da rede municipal de ensino de Angra dos Reis no IDEB, Avalia RJ e IDEAR.",
+  "lang": "pt-BR",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#00437f",
+  "background_color": "#00437f",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

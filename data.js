@@ -1,0 +1,54 @@
+/* Dados do painel – edite aqui para atualizar o app.
+   null = sem dado. Fonte IDEB: QEdu (dados oficiais do INEP), rede municipal de Angra dos Reis (IBGE 3300100). */
+window.DADOS = {
+  atualizado: "novembro de 2026",
+  ideb: {
+    anos: ["2007","2009","2011","2013","2015","2017","2019","2021","2023","2025"],
+    AI: {
+      nome: "Anos Iniciais (1º ao 5º ano)",
+      obs:   [4.4,4.2,5.1,5.1,4.9,5.1,5.1,5.5,5.7,6.1],
+      meta:  [3.7,4.0,4.4,4.7,5.0,5.3,5.6,5.9,null,null],
+      aprend:[5.25,5.37,5.74,5.76,5.62,5.78,5.74,5.53,5.81,6.22],
+      fluxo: [0.84,0.79,0.89,0.88,0.87,0.88,0.89,0.99,0.97,0.98],
+      mt:    [204.71,206.99,217.75,217.82,210.55,212.54,214.44,208.09,217.17,229.11],
+      lp:    [186.13,189.99,199.05,200.03,200.13,206.77,202.85,197.49,203.57,213.43],
+      aprov: [83.4,79.1,88.8,88.1,87.3,87.3,88.7,99.3,97.5,98.1]
+    },
+    AF: {
+      nome: "Anos Finais (6º ao 9º ano)",
+      obs:   [3.4,3.3,3.9,3.5,3.6,3.4,3.8,4.5,4.5,4.7],
+      meta:  [3.3,3.5,3.8,4.2,4.5,4.8,5.1,5.3,null,null],
+      aprend:[4.38,4.68,4.98,4.62,4.49,4.43,4.66,4.70,4.83,4.95],
+      fluxo: [0.77,0.70,0.78,0.75,0.79,0.76,0.81,0.97,0.93,0.96],
+      mt:    [230.5,237.06,247.06,238.88,236.86,231.78,238.23,238.01,239.56,245.2],
+      lp:    [232.46,243.59,251.84,238.28,232.45,233.96,241.16,243.87,250.28,251.91],
+      aprov: [75.8,68.8,76.7,73.9,78.1,75.9,80.1,96.8,92.9,96.0]
+    }
+  },
+  /* Avalia RJ – Indicador Criança Alfabetizada (ICA), 2º ano, rede municipal (QEdu) */
+  avaliaRJ: [
+    { ano: "2023", pct: 57.0, meta: null,  part: 84.85, alunos: 2084 },
+    { ano: "2024", pct: 60.8, meta: 60.82, part: 85.64, alunos: 2115 },
+    { ano: "2025", pct: 64.0, meta: 65.0,  part: 91.79, alunos: 2139 }
+  ],
+  /* IDEAR – médias da rede (Prefeitura de Angra dos Reis, 06/03/2026) */
+  idear: {
+    anos: ["2022","2023","2024","2025"],
+    AI: [4.8,6.25,6.52,6.81],
+    AF: [3.8,4.07,3.94,4.16],
+    metas2025: [
+      ["Escolas que atingiram a meta","63 unidades"],
+      ["Educação Infantil","28 escolas"],
+      ["Anos Iniciais","29 escolas"],
+      ["Anos Finais","3 escolas"],
+      ["Educação Especial","2 escolas"],
+      ["EJA","1 escola"]
+    ]
+  },
+  fontes: [
+    { titulo: "IDEB de Angra dos Reis", site: "QEdu", url: "https://qedu.org.br/municipio/3300100-angra-dos-reis/ideb" },
+    { titulo: "Alfabetização (ICA/Avalia RJ) nos municípios do RJ", site: "QEdu", url: "https://qedu.org.br/uf/33-rio-de-janeiro/explore?aba=alfabetizacao&cidade=angra-dos-reis" },
+    { titulo: "Resultados oficiais do IDEB", site: "INEP", url: "https://www.gov.br/inep/pt-br/areas-de-atuacao/pesquisas-estatisticas-e-indicadores/ideb/resultados" },
+    { titulo: "Metas da educação 2026 e resultados do IDEAR 2025", site: "angra.rj.gov.br · 06/03/2026", url: "https://angra.rj.gov.br/noticias/06-03-2026/angra-entrega-metas-da-educacao-para-escolas-municipais-em-2026-e-lanca-idear-alfa" }
+  ]
+};
