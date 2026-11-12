@@ -38,6 +38,10 @@
       <button type="button" role="tab" data-vista="rede" aria-selected="true">IDEB</button>
       <button type="button" role="tab" data-vista="escolas" aria-selected="false">Escolas</button>
     </nav>
+    <nav class="abas subabas" id="sub-avalia" role="tablist" aria-label="Dentro do Avalia RJ" hidden>
+      <button type="button" role="tab" data-vista="rede" aria-selected="true">Avalia RJ</button>
+      <button type="button" role="tab" data-vista="escolas" aria-selected="false">Escolas</button>
+    </nav>
   </header>
 
   <main id="conteudo">
@@ -87,6 +91,7 @@
     </section>
 
     <section class="aba" id="aba-avalia" hidden>
+      <div id="avalia-rede">
       <h2>Crianças alfabetizadas no 2º ano (Avalia RJ)</h2>
       <p class="legenda-sec">Percentual de alunos alfabetizados ao final do 2º ano, rede municipal.</p>
       <div class="grade2">
@@ -96,6 +101,17 @@
       <h2>Sobre o Avalia RJ</h2>
       <p>O Avalia RJ é a avaliação estadual do Rio de Janeiro. Seus resultados de Língua Portuguesa do 2º ano compõem o Indicador Criança Alfabetizada (ICA), calculado em cooperação com o INEP no Compromisso Nacional Criança Alfabetizada. Em 2025 a rede municipal chegou a 64% de alunos alfabetizados, a 1 ponto da meta de 65%.</p>
       <p>Fonte: <a href="https://qedu.org.br/uf/33-rio-de-janeiro/explore?aba=alfabetizacao&amp;cidade=angra-dos-reis" target="_blank" rel="noopener">QEdu – Alfabetização</a></p>
+      </div>
+      <div id="avalia-escolas" hidden>
+        <div id="avalia-lista">
+          <h2 class="primeiro">Escolas da rede municipal</h2>
+          <p class="legenda-sec">Fonte: resultados por escola do Avalia RJ 2024 e 2025 (planilha da rede municipal). 2023 ainda não disponível por escola.</p>
+          <input id="busca-avalia-escola" type="search" placeholder="Buscar escola" aria-label="Buscar escola" autocomplete="off" enterkeyhint="search">
+          <p class="legenda-sec" id="contagem-avalia"></p>
+          <div id="lista-avalia"></div>
+        </div>
+        <div id="avalia-detalhe" hidden></div>
+      </div>
     </section>
 
     <section class="aba" id="aba-idear" hidden>
@@ -131,6 +147,7 @@
 
   <script src="data.js"></script>
   <script src="escolas.js"></script>
+  <script src="avalia_escolas.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
