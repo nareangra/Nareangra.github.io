@@ -706,5 +706,52 @@
   window.addEventListener("hashchange", function(){ aplicarRota(true); });
   aplicarRota(false);
 
+  /* Compartilhar o endereço do app, só na Visão geral. */
+  var URL_APP = "https://nareangra.github.io";
+  var avisoCopia = $("#aviso-copia");
+  var timerCopia = null;
+  function mostrarCopiado(){
+    if (!avisoCopia) return;
+    avisoCopia.hidden = false;
+    if (timerCopia) clearTimeout(timerCopia);
+    timerCopia = setTimeout(function(){ avisoCopia.hidden = true; }, 2500);
+  }
+  function copiarFallback(){
+    var ta = document.createElement("textarea");
+    ta.value = URL_APP;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.top = "0";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (err) { ok = false; }
+    document.body.removeChild(ta);
+    if (ok) mostrarCopiado();
+  }
+  var btnCopiar = $("#btn-copiar");
+  if (btnCopiar) btnCopiar.addEventListener("click", function(){
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        var pend = navigator.clipboard.writeText(URL_APP);
+        if (pend && typeof pend.then === "function") pend.then(mostrarCopiado, copiarFallback);
+        else mostrarCopiado();
+      } catch (err) { copiarFallback(); }
+    } else copiarFallback();
+  });
+  var btnShare = $("#btn-compartilhar");
+  if (btnShare && navigator.share) {
+    btnShare.hidden = false;
+    btnShare.addEventListener("click", function(){
+      navigator.share({
+        title: "Indicadores da Educação – Angra dos Reis",
+        text: "Veja os indicadores da rede municipal de Angra dos Reis:",
+        url: URL_APP
+      }).catch(function(){});
+    });
+  }
+
   if ("serviceWorker" in navigator) { window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); }); }
 })();
