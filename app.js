@@ -783,9 +783,12 @@
     });
     if (grupo) html += "</div>";
     if (secao && secao.id === "3a-formativa") {
-      var temPortugues = false;
-      itens.forEach(function(item){ if (item.grupo === "Língua Portuguesa" && item.arquivo) temPortugues = true; });
-      if (!temPortugues) html += "<h3>Língua Portuguesa</h3><p class=\"legenda-sec\">Em breve</p>";
+      var temOitavo = false, temNono = false;
+      itens.forEach(function(item){
+        if (item.grupo === "Língua Portuguesa" && item.titulo === "8º ano") temOitavo = true;
+        if (item.grupo === "Língua Portuguesa" && item.titulo === "9º ano") temNono = true;
+      });
+      if (!temOitavo || !temNono) html += '<p class="legenda-sec">Em breve: 8º e 9º ano</p>';
     }
     box.innerHTML = html;
   }
