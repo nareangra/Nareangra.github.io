@@ -699,13 +699,7 @@
           b.setAttribute("aria-selected", b.getAttribute("data-secao") === secaoProva.id ? "true" : "false");
         });
       }
-      var textoProva = $("#provas-texto");
-      if (textoProva) {
-        var itensAtivos = secaoProva ? (secaoProva.itens || []) : (blocoProva && blocoProva.itens ? blocoProva.itens : []);
-        if (!itensAtivos.length) {
-          textoProva.textContent = secaoProva ? "Em breve: conteúdo da " + secaoProva.titulo + " " + anoProva : "Em breve: conteúdo de " + anoProva;
-        }
-      }
+      mostrarProvas(anoProva, secaoProva, blocoProva);
     } else if ($("#sub-provas-secoes")) $("#sub-provas-secoes").hidden = true;
     desenharTudo();
     if (rolar) window.scrollTo(0, 0);
@@ -749,6 +743,134 @@
       if (location.hash !== next) location.hash = next;
       else aplicarRota(true);
     });
+  });
+
+  var itensProvaAbertos = [];
+  var provaAberta = null;
+  var ICO_PDF = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 2.5h7.2L19.5 8v12.2a1.8 1.8 0 0 1-1.8 1.8H7A1.8 1.8 0 0 1 5.2 20.2V4.3A1.8 1.8 0 0 1 7 2.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 2.8V8h5.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>';
+  function tamanhoArquivo(n){
+    if (n === null || n === undefined || !isFinite(n)) return "";
+    return (n / 1048576).toFixed(1).replace(".", ",") + " MB";
+  }
+  function nomeArquivoProva(caminho){
+    var partesArq = String(caminho || "").split("/");
+    return partesArq[partesArq.length - 1] || "prova.pdf";
+  }
+  function urlProva(caminho){
+    return new URL(caminho, location.href).href;
+  }
+  function mostrarProvas(ano, secao, bloco){
+    var box = $("#provas-conteudo");
+    if (!box) return;
+    var itens = secao ? (secao.itens || []) : (bloco && bloco.itens ? bloco.itens : []);
+    itensProvaAbertos = itens;
+    if (!itens.length) {
+      box.innerHTML = '<div class="cartao"><p>' + (secao ? "Em breve: conteúdo da " + htmlEsc(secao.titulo) + " " + ano : "Em breve: conteúdo de " + ano) + "</p></div>";
+      return;
+    }
+    var html = '<h2 class="primeiro">' + htmlEsc(secao && secao.titulo ? secao.titulo + " " + ano : "Provas " + ano) + "</h2>";
+    if (secao && secao.id === "2a-formativa" && ano === "2023") html = '<h2 class="primeiro">2ª Avaliação Formativa 2023</h2>';
+    var grupo = "";
+    itens.forEach(function(item, i){
+      if (item.grupo !== grupo) {
+        if (grupo) html += "</div>";
+        grupo = item.grupo || "";
+        html += "<h3>" + htmlEsc(grupo) + '</h3><div class="lista-provas">';
+      }
+      html += '<button type="button" class="prova" data-prova="' + i + '">' + ICO_PDF +
+        '<span class="nome">' + htmlEsc(item.titulo) + '</span><span class="tam">' + tamanhoArquivo(item.bytes) + "</span></button>";
+    });
+    if (grupo) html += "</div>";
+    box.innerHTML = html;
+  }
+  function fecharFolha(){
+    var folha = $("#folha-prova");
+    if (folha) folha.hidden = true;
+    provaAberta = null;
+  }
+  function abrirFolha(item){
+    provaAberta = item;
+    var titulo = $("#folha-titulo");
+    if (titulo) titulo.textContent = item.titulo;
+    var baixar = $("#folha-baixar");
+    if (baixar) {
+      baixar.href = item.arquivo;
+      baixar.setAttribute("download", nomeArquivoProva(item.arquivo));
+    }
+    var aviso = $("#folha-copiado");
+    if (aviso) aviso.hidden = true;
+    var folha = $("#folha-prova");
+    if (folha) folha.hidden = false;
+  }
+  function copiarUrlProva(url){
+    function ok(){
+      var aviso = $("#folha-copiado");
+      if (aviso) aviso.hidden = false;
+    }
+    function fallback(){
+      var ta = document.createElement("textarea");
+      ta.value = url;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.left = "-9999px";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      var certo = false;
+      try { certo = document.execCommand("copy"); } catch (err) { certo = false; }
+      document.body.removeChild(ta);
+      if (certo) ok();
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        var pend = navigator.clipboard.writeText(url);
+        if (pend && typeof pend.then === "function") pend.then(ok, fallback);
+        else ok();
+      } catch (err) { fallback(); }
+    } else fallback();
+  }
+  function compartilharProva(item){
+    var url = urlProva(item.arquivo);
+    var titulo = item.titulo;
+    var texto = "2ª Avaliação Formativa 2023";
+    function shareUrl(){
+      navigator.share({ title: titulo, text: texto, url: url }).catch(function(err){
+        if (err && err.name === "AbortError") return;
+        copiarUrlProva(url);
+      });
+    }
+    if (!navigator.share) { copiarUrlProva(url); return; }
+    if (!navigator.canShare) { shareUrl(); return; }
+    fetch(item.arquivo).then(function(r){
+      if (!r.ok) throw new Error("pdf");
+      return r.blob();
+    }).then(function(blob){
+      var file = new File([blob], nomeArquivoProva(item.arquivo), { type: blob.type || "application/pdf" });
+      if (navigator.canShare({ files: [file] })) {
+        return navigator.share({ files: [file], title: titulo, text: texto }).catch(function(err){
+          if (err && err.name === "AbortError") return;
+          shareUrl();
+        });
+      }
+      shareUrl();
+    }).catch(function(){ shareUrl(); });
+  }
+  var provasEl = $("#aba-provas");
+  if (provasEl) provasEl.addEventListener("click", function(ev){
+    var t = ev.target;
+    if (t.closest && t.closest("#folha-cancelar, #folha-fundo")) { fecharFolha(); return; }
+    var provaBtn = t.closest ? t.closest("button.prova") : null;
+    if (provaBtn) {
+      var idx = parseInt(provaBtn.getAttribute("data-prova"), 10);
+      if (itensProvaAbertos[idx]) abrirFolha(itensProvaAbertos[idx]);
+    }
+  });
+  var btnShareProva = $("#folha-compartilhar");
+  if (btnShareProva) btnShareProva.addEventListener("click", function(){
+    if (provaAberta) compartilharProva(provaAberta);
+  });
+  document.addEventListener("keydown", function(ev){
+    if (ev.key === "Escape" && $("#folha-prova") && !$("#folha-prova").hidden) fecharFolha();
   });
   window.addEventListener("hashchange", function(){ aplicarRota(true); });
   aplicarRota(false);

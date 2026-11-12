@@ -146,7 +146,17 @@
     </section>
 
     <section class="aba" id="aba-provas" hidden>
-      <div class="cartao" id="provas-conteudo"><p id="provas-texto">Em breve: conteúdo de 2025</p></div>
+      <div id="provas-conteudo"><div class="cartao"><p id="provas-texto">Em breve: conteúdo de 2025</p></div></div>
+      <div id="folha-prova" class="folha" hidden>
+        <button type="button" class="folha-fundo" id="folha-fundo" aria-label="Fechar"></button>
+        <div class="folha-painel" role="dialog" aria-modal="true" aria-labelledby="folha-titulo">
+          <p id="folha-titulo" class="folha-titulo"></p>
+          <a id="folha-baixar" class="folha-acao" download>Baixar</a>
+          <button type="button" id="folha-compartilhar" class="folha-acao">Compartilhar</button>
+          <button type="button" id="folha-cancelar" class="folha-acao secundario">Cancelar</button>
+          <p id="folha-copiado" class="aviso-copia" hidden role="status">Link copiado!</p>
+        </div>
+      </div>
     </section>
 
     <section class="fontes">
