@@ -95,7 +95,9 @@ window.DADOS = {
           { grupo: "Língua Portuguesa", titulo: "4º ano", arquivo: "provas/2023/3a-formativa/portugues-4ano.pdf", bytes: 2344355 },
           { grupo: "Língua Portuguesa", titulo: "5º ano", arquivo: "provas/2023/3a-formativa/portugues-5ano.pdf", bytes: 2120440 },
           { grupo: "Língua Portuguesa", titulo: "6º ano", arquivo: "provas/2023/3a-formativa/portugues-6ano.pdf", bytes: 2868547 },
-          { grupo: "Língua Portuguesa", titulo: "7º ano", arquivo: "provas/2023/3a-formativa/portugues-7ano.pdf", bytes: 3909969 }
+          { grupo: "Língua Portuguesa", titulo: "7º ano", arquivo: "provas/2023/3a-formativa/portugues-7ano.pdf", bytes: 3909969 },
+          { grupo: "Língua Portuguesa", titulo: "8º ano", arquivo: "provas/2023/3a-formativa/portugues-8ano.pdf", bytes: 2936054 },
+          { grupo: "Língua Portuguesa", titulo: "9º ano", arquivo: "provas/2023/3a-formativa/portugues-9ano.pdf", bytes: 3757269 }
         ] }
       ]
     },
