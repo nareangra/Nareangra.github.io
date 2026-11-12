@@ -1,5 +1,5 @@
 /* Service worker: cache para uso offline. Ao atualizar dados, aumente a versão. */
-const CACHE = "indicadores-angra-v16";
+const CACHE = "indicadores-angra-v17";
 const ARQUIVOS = [
   "./", "./index.html", "./styles.css", "./app.js", "./data.js", "./escolas.js", "./avalia_escolas.js", "./manifest.webmanifest", "./favicon.ico",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-maskable-192.png", "./icons/icon-maskable-512.png",
@@ -13,9 +13,11 @@ self.addEventListener("activate", (e) => {
 });
 /* Rede primeiro (dados sempre frescos quando online), cache quando offline. */
 self.addEventListener("fetch", (e) => {
-  if (e.request.method !== "GET" || new URL(e.request.url).origin !== location.origin) return;
+  const url = new URL(e.request.url);
+  if (url.hostname === "gc.zgo.at" || url.hostname === "nareangra.goatcounter.com") return;
+  if (e.request.method !== "GET" || url.origin !== location.origin) return;
   /* Cadernos em PDF ficam de fora do cache (são grandes e devem vir da rede). */
-  if (new URL(e.request.url).pathname.toLowerCase().endsWith(".pdf")) return;
+  if (url.pathname.toLowerCase().endsWith(".pdf")) return;
   e.respondWith(
     fetch(e.request).then((r) => {
       const copia = r.clone();

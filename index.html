@@ -170,5 +170,20 @@
   <script src="escolas.js"></script>
   <script src="avalia_escolas.js"></script>
   <script src="app.js"></script>
+  <script>
+    window.goatcounter = window.goatcounter || {};
+    window.goatcounter.path = function () { return location.pathname + location.search + location.hash; };
+  </script>
+  <script data-goatcounter="https://nareangra.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+  <script>
+    window.addEventListener("hashchange", function () {
+      if (window.goatcounter && window.goatcounter.count) {
+        window.goatcounter.count({
+          path: location.pathname + location.search + location.hash,
+          event: false
+        });
+      }
+    });
+  </script>
 </body>
 </html>
