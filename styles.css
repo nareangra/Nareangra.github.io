@@ -59,6 +59,11 @@ h2.primeiro{margin-top:4px}
 .selo{font-size:.75rem;font-weight:650;background:color-mix(in srgb, var(--azul2) 14%, transparent);color:var(--azul2);border-radius:999px;padding:3px 8px}
 .selo.vazio{background:transparent;color:var(--texto2);border:1px solid var(--borda);font-weight:600}
 .voltar{border:1px solid var(--borda);background:var(--papel);color:var(--texto);font:inherit;font-size:.95rem;border-radius:999px;padding:8px 14px;cursor:pointer}
+.compartilhar{margin-top:28px}
+.compartilhar .botoes{display:flex;flex-wrap:wrap;gap:8px}
+.compartilhar .url-app{margin:10px 0 0;font-size:.85rem;color:var(--texto2);word-break:break-all}
+.aviso-copia{margin:8px 0 0;font-size:.85rem;font-weight:650;color:var(--ok)}
+.aviso-copia[hidden]{display:none}
 .ok{color:var(--ok);font-weight:600}.abaixo{color:var(--alerta);font-weight:600}
 .titulo-acao{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:28px}
 .titulo-acao h2{margin:0}
