@@ -101,7 +101,12 @@ window.DADOS = {
         ] }
       ]
     },
-    "2024": { itens: [] },
+    "2024": {
+      secoes: [
+        { id: "1a-formativa", titulo: "1ª Formativa", itens: [] },
+        { id: "2a-formativa", titulo: "2ª Formativa", itens: [] }
+      ]
+    },
     "2025": { itens: [] }
   },
   /* Texto antigo da aba Provas, guardado e não exibido. */
