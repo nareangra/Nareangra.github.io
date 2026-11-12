@@ -125,7 +125,28 @@ window.DADOS = {
           { grupo: "Língua Portuguesa", titulo: "8º ano", arquivo: "provas/2024/1a-formativa/portugues-8ano.pdf", bytes: 1952277 },
           { grupo: "Língua Portuguesa", titulo: "9º ano", arquivo: "provas/2024/1a-formativa/portugues-9ano.pdf", bytes: 2340239 }
         ] },
-        { id: "2a-formativa", titulo: "2ª Formativa", itens: [] }
+        { id: "2a-formativa", titulo: "2ª Formativa", itens: [
+          { grupo: "Matemática", titulo: "2º ano – Caderno do estudante", arquivo: "provas/2024/2a-formativa/matematica-2ano-estudante.pdf", bytes: 2395198 },
+          { grupo: "Matemática", titulo: "2º ano – Caderno do aplicador", arquivo: "provas/2024/2a-formativa/matematica-2ano-aplicador.pdf", bytes: 2650304 },
+          { grupo: "Matemática", titulo: "3º ano – Caderno do estudante", arquivo: "provas/2024/2a-formativa/matematica-3ano-estudante.pdf", bytes: 4065537 },
+          { grupo: "Matemática", titulo: "3º ano – Caderno do aplicador", arquivo: "provas/2024/2a-formativa/matematica-3ano-aplicador.pdf", bytes: 4321101 },
+          { grupo: "Matemática", titulo: "4º ano", arquivo: "provas/2024/2a-formativa/matematica-4ano.pdf", bytes: 999279 },
+          { grupo: "Matemática", titulo: "5º ano", arquivo: "provas/2024/2a-formativa/matematica-5ano.pdf", bytes: 1103268 },
+          { grupo: "Matemática", titulo: "6º ano", arquivo: "provas/2024/2a-formativa/matematica-6ano.pdf", bytes: 1042527 },
+          { grupo: "Matemática", titulo: "7º ano", arquivo: "provas/2024/2a-formativa/matematica-7ano.pdf", bytes: 732701 },
+          { grupo: "Matemática", titulo: "8º ano", arquivo: "provas/2024/2a-formativa/matematica-8ano.pdf", bytes: 756466 },
+          { grupo: "Matemática", titulo: "9º ano", arquivo: "provas/2024/2a-formativa/matematica-9ano.pdf", bytes: 747710 },
+          { grupo: "Língua Portuguesa", titulo: "2º ano – Caderno do estudante", arquivo: "provas/2024/2a-formativa/portugues-2ano-estudante.pdf", bytes: 2022425 },
+          { grupo: "Língua Portuguesa", titulo: "2º ano – Caderno do aplicador", arquivo: "provas/2024/2a-formativa/portugues-2ano-aplicador.pdf", bytes: 2305545 },
+          { grupo: "Língua Portuguesa", titulo: "3º ano – Caderno do estudante", arquivo: "provas/2024/2a-formativa/portugues-3ano-estudante.pdf", bytes: 1001352 },
+          { grupo: "Língua Portuguesa", titulo: "3º ano – Caderno do aplicador", arquivo: "provas/2024/2a-formativa/portugues-3ano-aplicador.pdf", bytes: 1291325 },
+          { grupo: "Língua Portuguesa", titulo: "4º ano", arquivo: "provas/2024/2a-formativa/portugues-4ano.pdf", bytes: 1518276 },
+          { grupo: "Língua Portuguesa", titulo: "5º ano", arquivo: "provas/2024/2a-formativa/portugues-5ano.pdf", bytes: 1402930 },
+          { grupo: "Língua Portuguesa", titulo: "6º ano", arquivo: "provas/2024/2a-formativa/portugues-6ano.pdf", bytes: 1185707 },
+          { grupo: "Língua Portuguesa", titulo: "7º ano", arquivo: "provas/2024/2a-formativa/portugues-7ano.pdf", bytes: 1748798 },
+          { grupo: "Língua Portuguesa", titulo: "8º ano", arquivo: "provas/2024/2a-formativa/portugues-8ano.pdf", bytes: 2494378 },
+          { grupo: "Língua Portuguesa", titulo: "9º ano", arquivo: "provas/2024/2a-formativa/portugues-9ano.pdf", bytes: 2352611 }
+        ] }
       ]
     },
     "2025": { itens: [] }
