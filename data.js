@@ -50,5 +50,21 @@ window.DADOS = {
     { titulo: "Alfabetização (ICA/Avalia RJ) nos municípios do RJ", site: "QEdu", url: "https://qedu.org.br/uf/33-rio-de-janeiro/explore?aba=alfabetizacao&cidade=angra-dos-reis" },
     { titulo: "Resultados oficiais do IDEB", site: "INEP", url: "https://www.gov.br/inep/pt-br/areas-de-atuacao/pesquisas-estatisticas-e-indicadores/ideb/resultados" },
     { titulo: "Metas da educação 2026 e resultados do IDEAR 2025", site: "angra.rj.gov.br · 06/03/2026", url: "https://angra.rj.gov.br/noticias/06-03-2026/angra-entrega-metas-da-educacao-para-escolas-municipais-em-2026-e-lanca-idear-alfa" }
-  ]
+  ],
+  /* Conteúdo de cada ano: acrescente objetos em itens ({ titulo, texto, url }). Vazio = aviso "Em breve". */
+  provas: {
+    "2023": { itens: [] },
+    "2024": { itens: [] },
+    "2025": { itens: [] }
+  },
+  /* Texto antigo da aba Provas, guardado e não exibido. */
+  provasExemplo: {
+    titulo: "Exemplos de provas",
+    texto: "Esta área vai reunir exemplos de provas e itens das avaliações acompanhadas pelo painel, para que famílias, estudantes e professores conheçam o formato de cada uma.",
+    passos: [
+      { titulo: "Seleção do material", texto: "A Secretaria escolhe provas e itens já liberados para divulgação." },
+      { titulo: "Organização por avaliação", texto: "Os exemplos ficam separados por SAEB/IDEB, Avalia RJ e AVALIAR/IDEAR, e por ano escolar." },
+      { titulo: "Publicação no painel", texto: "Cada exemplo traz a habilidade avaliada e o link para o material completo." }
+    ]
+  }
 };

@@ -647,6 +647,8 @@
     if (sub) sub.hidden = id !== "ideb";
     var subAv = $("#sub-avalia");
     if (subAv) subAv.hidden = id !== "avalia";
+    var subPr = $("#sub-provas");
+    if (subPr) subPr.hidden = id !== "provas";
     var escolas = id === "ideb" && partes[1] === "escolas";
     var escolasAv = id === "avalia" && partes[1] === "escolas";
     var rede = $("#ideb-rede"), painel = $("#ideb-escolas");
@@ -679,12 +681,24 @@
         else { mostrarListaAvalia(); var contAv = $("#contagem-avalia"); if (contAv) contAv.textContent = "Escola não encontrada. " + contAv.textContent; }
       } else mostrarListaAvalia();
     } else vistaAvalia = null;
+    if (id === "provas") {
+      var anosProva = ["2023", "2024", "2025"];
+      var anoProva = anosProva.indexOf(partes[1]) >= 0 ? partes[1] : "2025";
+      document.querySelectorAll("#sub-provas button").forEach(function(b){
+        b.setAttribute("aria-selected", b.getAttribute("data-ano") === anoProva ? "true" : "false");
+      });
+      var textoProva = $("#provas-texto");
+      var blocoProva = D.provas && D.provas[anoProva];
+      var itensProva = blocoProva && blocoProva.itens ? blocoProva.itens : [];
+      if (textoProva && !itensProva.length) textoProva.textContent = "Em breve: conteúdo de " + anoProva;
+    }
     desenharTudo();
     if (rolar) window.scrollTo(0, 0);
   }
   abas.forEach(function(b){
     b.addEventListener("click", function(){
-      var next = "#" + b.getAttribute("data-aba");
+      var abaId = b.getAttribute("data-aba");
+      var next = abaId === "provas" ? "#provas/2025" : "#" + abaId;
       if (location.hash !== next) location.hash = next;
       else aplicarRota(true);
     });
@@ -699,6 +713,13 @@
   document.querySelectorAll("#sub-avalia button").forEach(function(b){
     b.addEventListener("click", function(){
       var next = b.getAttribute("data-vista") === "escolas" ? "#avalia/escolas" : "#avalia";
+      if (location.hash !== next) location.hash = next;
+      else aplicarRota(true);
+    });
+  });
+  document.querySelectorAll("#sub-provas button").forEach(function(b){
+    b.addEventListener("click", function(){
+      var next = "#provas/" + b.getAttribute("data-ano");
       if (location.hash !== next) location.hash = next;
       else aplicarRota(true);
     });
