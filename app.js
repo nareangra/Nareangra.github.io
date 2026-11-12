@@ -773,7 +773,7 @@
       return;
     }
     var tituloLista = secao && secao.titulo ? secao.titulo + " " + ano : "Provas " + ano;
-    if (secao && ano === "2023" && (secao.id === "2a-formativa" || secao.id === "3a-formativa")) tituloLista = secao.titulo.replace("Formativa", "Avaliação Formativa") + " " + ano;
+    if (secao && secao.id && secao.id.indexOf("formativa") >= 0) tituloLista = secao.titulo.replace("Formativa", "Avaliação Formativa") + " " + ano;
     var html = '<h2 class="primeiro">' + htmlEsc(tituloLista) + "</h2>";
     var grupo = "";
     itens.forEach(function(item, i){
@@ -837,7 +837,11 @@
   function compartilharProva(item){
     var url = urlProva(item.arquivo);
     var titulo = item.titulo;
-    var texto = item.arquivo && item.arquivo.indexOf("/3a-formativa/") >= 0 ? "3ª Avaliação Formativa 2023" : "2ª Avaliação Formativa 2023";
+    var texto = "Avaliação formativa";
+    var caminho = item.arquivo || "";
+    var anoArq = caminho.indexOf("/2024/") >= 0 ? "2024" : "2023";
+    var qual = caminho.indexOf("/1a-formativa/") >= 0 ? "1ª" : caminho.indexOf("/3a-formativa/") >= 0 ? "3ª" : "2ª";
+    texto = qual + " Avaliação Formativa " + anoArq;
     function shareUrl(){
       navigator.share({ title: titulo, text: texto, url: url }).catch(function(err){
         if (err && err.name === "AbortError") return;
