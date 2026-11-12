@@ -1,5 +1,5 @@
 /* Service worker: cache para uso offline. Ao atualizar dados, aumente a versão. */
-const CACHE = "indicadores-angra-v7";
+const CACHE = "indicadores-angra-v8";
 const ARQUIVOS = [
   "./", "./index.html", "./styles.css", "./app.js", "./data.js", "./escolas.js", "./avalia_escolas.js", "./manifest.webmanifest", "./favicon.ico",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-maskable-192.png", "./icons/icon-maskable-512.png",
