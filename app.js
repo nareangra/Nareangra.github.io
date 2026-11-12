@@ -283,6 +283,7 @@
     desenharColuna("AI");
     desenharColuna("AF");
     if (vistaEscola) desenharVistaEscola();
+    if (vistaAvalia) desenharGraficoAvalia();
   }
   desenharTudo();
   var rz; window.addEventListener("resize", function(){ clearTimeout(rz); rz = setTimeout(desenharTudo, 150); });
@@ -514,7 +515,127 @@
   });
   $("#busca-escola").addEventListener("input", function(){ buscaEscola = this.value; filtrarLista(); });
 
-  /* Abas e rotas #ideb/escolas/<inep ou slug> */
+  /* Avalia RJ por escola. Anos fixos 2023–2025; 2023 ainda não tem dado por escola. */
+  var ANOS_AV = ["2023", "2024", "2025"];
+  var NOTA_AV = "Fonte: resultados por escola do Avalia RJ 2024 e 2025 (planilha da rede municipal). 2023 ainda não disponível por escola.";
+  var vistaAvalia = null;
+  var buscaAvalia = "";
+  function idAvalia(e){ return e.inep || slugEscola(e.nome); }
+  function acharAvalia(id){
+    try { id = decodeURIComponent(id); } catch (err) {}
+    var lista = window.AVALIA_ESCOLAS || [];
+    for (var i = 0; i < lista.length; i++) if (idAvalia(lista[i]) === id) return lista[i];
+    return null;
+  }
+  function avaliaOrdenadas(){
+    return (window.AVALIA_ESCOLAS || []).slice().sort(function(a, b){ return a.nome.localeCompare(b.nome, "pt"); });
+  }
+  function pctEscolaAv(e, ano){
+    if (!e || !e.pct || !Object.prototype.hasOwnProperty.call(e.pct, ano)) return null;
+    var v = e.pct[ano];
+    return v === null || v === undefined || !isFinite(v) ? null : v;
+  }
+  function pctRedeAv(ano){
+    var v = null;
+    D.avaliaRJ.forEach(function(x){ if (String(x.ano) === String(ano)) v = x.pct; });
+    return v === null || v === undefined || !isFinite(v) ? null : v;
+  }
+  function fmtPctAv(v){
+    if (v === null || v === undefined || !isFinite(v)) return "—";
+    return br(v, 1) + "%";
+  }
+  function ultimoAvalia(e){
+    var last = null;
+    ANOS_AV.forEach(function(a){
+      var v = pctEscolaAv(e, a);
+      if (v !== null) last = { ano: a, v: v };
+    });
+    return last;
+  }
+  function pintarListaAvalia(){
+    var html = "";
+    avaliaOrdenadas().forEach(function(e){
+      var id = idAvalia(e);
+      var busca = semAcento(e.nome + " " + (e.inep || ""));
+      var ult = e.status === "sem_resultados" ? null : ultimoAvalia(e);
+      var selo = ult ? '<span class="selo">' + fmtPctAv(ult.v) + " · " + ult.ano + "</span>" : '<span class="selo vazio">Sem resultados</span>';
+      html += '<button type="button" class="escola" data-avalia="' + htmlEsc(id) + '" data-busca="' + htmlEsc(busca) + '"><span class="nome">' + htmlEsc(e.nome) + '</span><span class="selos">' + selo + "</span></button>";
+    });
+    $("#lista-avalia").innerHTML = html;
+    filtrarListaAvalia();
+  }
+  function filtrarListaAvalia(){
+    var q = semAcento(buscaAvalia.trim());
+    var vis = 0, total = 0;
+    document.querySelectorAll("#lista-avalia .escola").forEach(function(b){
+      total++;
+      var mostra = !q || b.getAttribute("data-busca").indexOf(q) !== -1;
+      b.hidden = !mostra;
+      if (mostra) vis++;
+    });
+    var cont = $("#contagem-avalia");
+    if (cont) cont.textContent = q ? (vis + " de " + total + " escolas") : (total + " escolas");
+  }
+  function mostrarListaAvalia(){
+    vistaAvalia = null;
+    $("#avalia-detalhe").hidden = true;
+    $("#avalia-lista").hidden = false;
+    if (!$("#lista-avalia").childElementCount) pintarListaAvalia();
+    var campo = $("#busca-avalia-escola");
+    if (campo && campo.value !== buscaAvalia) campo.value = buscaAvalia;
+    filtrarListaAvalia();
+  }
+  function desenharGraficoAvalia(){
+    if (!vistaAvalia || vistaAvalia.status === "sem_resultados") return;
+    var alvo = $("#graf-avalia-escola");
+    if (!alvo) return;
+    var escola = ANOS_AV.map(function(a){ return pctEscolaAv(vistaAvalia, a); });
+    var rede = ANOS_AV.map(function(a){ return pctRedeAv(a); });
+    linhas(alvo, ANOS_AV, [
+      { nome: "Escola", valores: escola, cor: cssVar("--azul2") },
+      { nome: "Rede", valores: rede, cor: cssVar("--teal") }
+    ], 0, 100, function(v){ return br(v, 1) + "%"; }, function(v){ return br(v, 0); });
+  }
+  function pintarDetalheAvalia(e){
+    var inep = e.inep ? '<p class="legenda-sec">Código INEP ' + htmlEsc(e.inep) + " · rede municipal</p>" : '<p class="legenda-sec">Rede municipal</p>';
+    var fonte = '<p class="legenda-sec">' + NOTA_AV + "</p>";
+    var corpo;
+    if (e.status === "sem_resultados") {
+      corpo = '<p class="aviso">Sem resultados.</p>';
+    } else {
+      var cards = ANOS_AV.map(function(a){
+        return '<div class="metrica"><div class="v">' + fmtPctAv(pctEscolaAv(e, a)) + '</div><div class="l">Alfabetizados (' + a + ')</div><div class="d">2º ano · ICA</div></div>';
+      }).join("");
+      corpo = '<div class="metricas">' + cards + "</div>" +
+        '<div class="grade2"><div class="cartao"><h3>Alfabetizados por ano</h3><div id="graf-avalia-escola"></div></div>' +
+        '<div class="cartao"><h3>Escola e rede</h3><div class="tabela-wrap"><table id="tab-avalia-escola"></table></div></div></div>';
+    }
+    $("#avalia-detalhe").innerHTML =
+      '<button type="button" class="voltar" id="btn-voltar-avalia">← Escolas</button>' +
+      '<h2 class="primeiro">' + htmlEsc(e.nome) + "</h2>" + inep + corpo + fonte;
+    if (e.status !== "sem_resultados") {
+      tabela($("#tab-avalia-escola"), ["Ano", "Escola", "Rede"], ANOS_AV.map(function(a){
+        return [a, fmtPctAv(pctEscolaAv(e, a)), fmtPctAv(pctRedeAv(a))];
+      }));
+    }
+  }
+  function abrirAvalia(e){
+    var mesmo = vistaAvalia && idAvalia(vistaAvalia) === idAvalia(e);
+    vistaAvalia = e;
+    $("#avalia-lista").hidden = true;
+    $("#avalia-detalhe").hidden = false;
+    if (!mesmo || !$("#avalia-detalhe").querySelector("h2")) pintarDetalheAvalia(e);
+    desenharGraficoAvalia();
+  }
+  $("#avalia-escolas").addEventListener("click", function(ev){
+    var t = ev.target;
+    var escolaBtn = t.closest ? t.closest("button[data-avalia]") : null;
+    if (escolaBtn) { location.hash = "#avalia/escolas/" + escolaBtn.getAttribute("data-avalia"); return; }
+    if (t.closest && t.closest("#btn-voltar-avalia")) location.hash = "#avalia/escolas";
+  });
+  $("#busca-avalia-escola").addEventListener("input", function(){ buscaAvalia = this.value; filtrarListaAvalia(); });
+
+  /* Abas e rotas #ideb/escolas/<inep ou slug> e #avalia/escolas/<inep ou slug> */
   var abas = document.querySelectorAll("#nav-principal button");
   function aplicarRota(rolar){
     var partes = (location.hash || "#geral").replace(/^#/, "").split("/");
@@ -524,12 +645,22 @@
     document.querySelectorAll(".aba").forEach(function(s){ s.hidden = s.id !== "aba-" + id; });
     var sub = $("#sub-ideb");
     if (sub) sub.hidden = id !== "ideb";
+    var subAv = $("#sub-avalia");
+    if (subAv) subAv.hidden = id !== "avalia";
     var escolas = id === "ideb" && partes[1] === "escolas";
+    var escolasAv = id === "avalia" && partes[1] === "escolas";
     var rede = $("#ideb-rede"), painel = $("#ideb-escolas");
     if (rede) rede.hidden = escolas;
     if (painel) painel.hidden = !escolas;
+    var redeAv = $("#avalia-rede"), painelAv = $("#avalia-escolas");
+    if (redeAv) redeAv.hidden = escolasAv;
+    if (painelAv) painelAv.hidden = !escolasAv;
     document.querySelectorAll("#sub-ideb button").forEach(function(b){
       var on = (escolas && b.getAttribute("data-vista") === "escolas") || (!escolas && b.getAttribute("data-vista") === "rede");
+      b.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    document.querySelectorAll("#sub-avalia button").forEach(function(b){
+      var on = (escolasAv && b.getAttribute("data-vista") === "escolas") || (!escolasAv && b.getAttribute("data-vista") === "rede");
       b.setAttribute("aria-selected", on ? "true" : "false");
     });
     if (escolas) {
@@ -540,6 +671,14 @@
         else { mostrarLista(); var cont = $("#contagem-escolas"); if (cont) cont.textContent = "Escola não encontrada. " + cont.textContent; }
       } else mostrarLista();
     } else vistaEscola = null;
+    if (escolasAv) {
+      var codAv = partes.slice(2).join("/");
+      if (codAv) {
+        var encontradaAv = acharAvalia(codAv);
+        if (encontradaAv) abrirAvalia(encontradaAv);
+        else { mostrarListaAvalia(); var contAv = $("#contagem-avalia"); if (contAv) contAv.textContent = "Escola não encontrada. " + contAv.textContent; }
+      } else mostrarListaAvalia();
+    } else vistaAvalia = null;
     desenharTudo();
     if (rolar) window.scrollTo(0, 0);
   }
@@ -553,6 +692,13 @@
   document.querySelectorAll("#sub-ideb button").forEach(function(b){
     b.addEventListener("click", function(){
       var next = b.getAttribute("data-vista") === "escolas" ? "#ideb/escolas" : "#ideb";
+      if (location.hash !== next) location.hash = next;
+      else aplicarRota(true);
+    });
+  });
+  document.querySelectorAll("#sub-avalia button").forEach(function(b){
+    b.addEventListener("click", function(){
+      var next = b.getAttribute("data-vista") === "escolas" ? "#avalia/escolas" : "#avalia";
       if (location.hash !== next) location.hash = next;
       else aplicarRota(true);
     });

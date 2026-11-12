@@ -21,6 +21,7 @@ h1{font-size:1.15rem;margin:0;line-height:1.2}
 .abas button{flex:1 1 auto;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.1);color:#fff;font:inherit;font-size:.9rem;padding:8px 12px;border-radius:999px;cursor:pointer}
 .abas button[aria-selected="true"]{background:#fff;color:var(--azul);font-weight:600}
 #sub-ideb button[data-vista="escolas"]{margin-left:8px}
+#sub-avalia button[data-vista="escolas"]{margin-left:8px}
 main{max-width:1180px;margin:0 auto;padding:16px 16px calc(env(safe-area-inset-bottom) + 32px)}
 h2{font-size:1.1rem;margin:28px 0 10px}
 h3{font-size:.95rem;margin:0 0 12px;color:var(--texto2);font-weight:600}
