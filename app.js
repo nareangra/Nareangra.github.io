@@ -517,7 +517,7 @@
 
   /* Avalia RJ por escola. Anos fixos 2023–2025; 2023 ainda não tem dado por escola. */
   var ANOS_AV = ["2023", "2024", "2025"];
-  var NOTA_AV = "Fonte: resultados por escola do Avalia RJ 2024 e 2025 (planilha da rede municipal). 2023 ainda não disponível por escola.";
+  var NOTA_AV = "Fonte: resultados por escola do Avalia RJ 2023, 2024 e 2025 (planilhas da rede municipal).";
   var vistaAvalia = null;
   var buscaAvalia = "";
   function idAvalia(e){ return e.inep || slugEscola(e.nome); }

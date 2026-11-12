@@ -68,6 +68,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33037140",
   "nome_planilha": "CETI EM PREFEITO FRANCISCO PEREIRA ROCHA",
   "pct": {
+   "2023": 63.0,
    "2024": 65.0,
    "2025": 83.0
   },
@@ -78,6 +79,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33037043",
   "nome_planilha": "EM ALMIRANTE TAMANDARE",
   "pct": {
+   "2023": 74.0,
    "2024": 71.0,
    "2025": 90.0
   },
@@ -95,6 +97,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33036780",
   "nome_planilha": "EM DR LAURO TRAVASSOS",
   "pct": {
+   "2023": 71.0,
    "2024": 71.0,
    "2025": 48.0
   },
@@ -119,6 +122,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33037361",
   "nome_planilha": "CETI EM INACIO DURING",
   "pct": {
+   "2023": 43.0,
    "2024": 63.0,
    "2025": 56.0
   },
@@ -129,6 +133,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33159424",
   "nome_planilha": "EM REGINA CELIA MONTEIRO PEREIRA",
   "pct": {
+   "2023": 72.0,
    "2024": 81.0,
    "2025": 85.0
   },
@@ -139,6 +144,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33037167",
   "nome_planilha": "EM PRINCESA IZABEL",
   "pct": {
+   "2023": 65.0,
    "2024": 72.0,
    "2025": 69.0
   },
@@ -159,6 +165,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33037159",
   "nome_planilha": "EM PREF TOSCANO DE BRITTO",
   "pct": {
+   "2023": 56.0,
    "2024": 63.0,
    "2025": 72.0
   },
@@ -169,6 +176,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33036837",
   "nome_planilha": "EM POETA CARLOS DRUMOND DE ANDRADE",
   "pct": {
+   "2023": 54.0,
    "2024": 59.0,
    "2025": 64.0
   },
@@ -179,6 +187,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33153540",
   "nome_planilha": "EM CORNELIS VEROLME",
   "pct": {
+   "2023": 72.0,
    "2024": 65.0,
    "2025": 67.0
   },
@@ -199,6 +208,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33037353",
   "nome_planilha": "EM FREI BERNARDO",
   "pct": {
+   "2023": 66.0,
    "2024": 53.0,
    "2025": 55.0
   },
@@ -218,6 +228,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33037450",
   "nome_planilha": "EM PEDRO SOARES",
   "pct": {
+   "2023": 69.0,
    "2025": 30.0
   },
   "status": "com_resultados"
@@ -227,6 +238,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33037299",
   "nome_planilha": "EM PROF SYLVIO DE CASTRO GALINDO",
   "pct": {
+   "2023": 65.0,
    "2024": 50.0,
    "2025": 68.0
   },
@@ -237,6 +249,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33037108",
   "nome_planilha": "CETI EM DE EDUCACAO EMPREENDEDORA FREI JOAO MOREIRA",
   "pct": {
+   "2023": 83.0,
    "2024": 89.0,
    "2025": 85.0
   },
@@ -247,6 +260,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33036853",
   "nome_planilha": "EM PROF ANTONIO JOSE NOVAES JORDAO",
   "pct": {
+   "2023": 47.0,
    "2024": 78.0,
    "2025": 75.0
   },
@@ -257,6 +271,7 @@ window.AVALIA_ESCOLAS = [
   "inep": null,
   "nome_planilha": "EM MORADA DO BRACUHY",
   "pct": {
+   "2023": 34.0,
    "2024": 53.0,
    "2025": 56.0
   },
@@ -281,6 +296,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33191530",
   "nome_planilha": "EM VENERA SILVIA DE AGUIAR",
   "pct": {
+   "2023": 43.0,
    "2024": 56.0,
    "2025": 44.0
   },
@@ -291,6 +307,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33037051",
   "nome_planilha": "EM ANGELO FRANCISCO JERONIMO",
   "pct": {
+   "2023": 50.0,
    "2024": 44.0,
    "2025": 89.0
   },
@@ -301,6 +318,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33036799",
   "nome_planilha": "EM FREI FERNANDO GEURTSE",
   "pct": {
+   "2023": 75.0,
    "2024": 72.0,
    "2025": 92.0
   },
@@ -311,6 +329,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33439389",
   "nome_planilha": "EM MANOEL RAMOS",
   "pct": {
+   "2023": 58.0,
    "2024": 60.0,
    "2025": 54.0
   },
@@ -321,6 +340,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33037116",
   "nome_planilha": "EM CECILIA MARA EDILEUS VIEIRA",
   "pct": {
+   "2023": 68.0,
    "2024": 67.0,
    "2025": 71.0
   },
@@ -338,6 +358,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33191360",
   "nome_planilha": "EM PREFEITO JOAO GREGORIO GALINDO",
   "pct": {
+   "2023": 65.0,
    "2024": 54.0,
    "2025": 62.0
   },
@@ -357,6 +378,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33037124",
   "nome_planilha": "EM JOAQUINA MARIA ROSA DOS SANTOS",
   "pct": {
+   "2023": 61.0,
    "2024": 91.0,
    "2025": 67.0
   },
@@ -367,6 +389,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33146500",
   "nome_planilha": "EM PREF JOSE LUIZ RIBEIRO RESECK",
   "pct": {
+   "2023": 56.0,
    "2024": 63.0,
    "2025": 68.0
   },
@@ -377,6 +400,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33037183",
   "nome_planilha": "EM PROF FRANCISCO DE ASSIS OLIVEIRA DINIZ",
   "pct": {
+   "2023": 59.0,
    "2024": 37.0,
    "2025": 71.0
   },
@@ -397,6 +421,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33037205",
   "nome_planilha": "EM SANTOS DUMONT",
   "pct": {
+   "2023": 47.0,
    "2024": 59.0,
    "2025": 65.0
   },
@@ -407,6 +432,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33037310",
   "nome_planilha": "EM RAUL POMPEIA",
   "pct": {
+   "2023": 75.0,
    "2024": 59.0,
    "2025": 74.0
   },
@@ -417,6 +443,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33036829",
   "nome_planilha": "CETI EM MARIA HERCILIA C DE CASTRO",
   "pct": {
+   "2023": 65.0,
    "2024": 81.0,
    "2025": 82.0
   },
@@ -434,6 +461,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33037370",
   "nome_planilha": "EM NOVA PEREQUE",
   "pct": {
+   "2023": 58.0,
    "2024": 70.0,
    "2025": 61.0
   },
@@ -444,6 +472,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33037086",
   "nome_planilha": "EM DOM PEDRO I",
   "pct": {
+   "2023": 64.0,
    "2024": 47.0,
    "2025": 66.0
   },
@@ -461,6 +490,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33036772",
   "nome_planilha": "EM PROF AMELIA ARAUJO LAGE",
   "pct": {
+   "2023": 42.0,
    "2024": 64.0,
    "2025": 48.0
   },
@@ -471,6 +501,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33036861",
   "nome_planilha": "CETI EM PROF JOSE AMERICO LOMEU BASTOS",
   "pct": {
+   "2023": 57.0,
    "2024": 87.0,
    "2025": 58.0
   },
@@ -481,6 +512,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33037000",
   "nome_planilha": "EM BRIGADEIRO NOBREGA",
   "pct": {
+   "2023": 67.0,
    "2024": 69.0,
    "2025": 64.0
   },
@@ -491,6 +523,7 @@ window.AVALIA_ESCOLAS = [
   "inep": "33037132",
   "nome_planilha": "EM MAURO SERGIO DA CUNHA",
   "pct": {
+   "2023": 42.0,
    "2024": 39.0,
    "2025": 32.0
   },
