@@ -768,8 +768,9 @@
       box.innerHTML = '<div class="cartao"><p>' + (secao ? "Em breve: conteúdo da " + htmlEsc(secao.titulo) + " " + ano : "Em breve: conteúdo de " + ano) + "</p></div>";
       return;
     }
-    var html = '<h2 class="primeiro">' + htmlEsc(secao && secao.titulo ? secao.titulo + " " + ano : "Provas " + ano) + "</h2>";
-    if (secao && secao.id === "2a-formativa" && ano === "2023") html = '<h2 class="primeiro">2ª Avaliação Formativa 2023</h2>';
+    var tituloLista = secao && secao.titulo ? secao.titulo + " " + ano : "Provas " + ano;
+    if (secao && ano === "2023" && (secao.id === "2a-formativa" || secao.id === "3a-formativa")) tituloLista = secao.titulo.replace("Formativa", "Avaliação Formativa") + " " + ano;
+    var html = '<h2 class="primeiro">' + htmlEsc(tituloLista) + "</h2>";
     var grupo = "";
     itens.forEach(function(item, i){
       if (item.grupo !== grupo) {
@@ -781,6 +782,11 @@
         '<span class="nome">' + htmlEsc(item.titulo) + '</span><span class="tam">' + tamanhoArquivo(item.bytes) + "</span></button>";
     });
     if (grupo) html += "</div>";
+    if (secao && secao.id === "3a-formativa") {
+      var temPortugues = false;
+      itens.forEach(function(item){ if (item.grupo === "Língua Portuguesa" && item.arquivo) temPortugues = true; });
+      if (!temPortugues) html += "<h3>Língua Portuguesa</h3><p class=\"legenda-sec\">Em breve</p>";
+    }
     box.innerHTML = html;
   }
   function fecharFolha(){
@@ -832,7 +838,7 @@
   function compartilharProva(item){
     var url = urlProva(item.arquivo);
     var titulo = item.titulo;
-    var texto = "2ª Avaliação Formativa 2023";
+    var texto = item.arquivo && item.arquivo.indexOf("/3a-formativa/") >= 0 ? "3ª Avaliação Formativa 2023" : "2ª Avaliação Formativa 2023";
     function shareUrl(){
       navigator.share({ title: titulo, text: texto, url: url }).catch(function(err){
         if (err && err.name === "AbortError") return;
