@@ -1,5 +1,5 @@
 /* Service worker: cache para uso offline. Ao atualizar dados, aumente a versão. */
-const CACHE = "indicadores-angra-v9";
+const CACHE = "indicadores-angra-v10";
 const ARQUIVOS = [
   "./", "./index.html", "./styles.css", "./app.js", "./data.js", "./escolas.js", "./avalia_escolas.js", "./manifest.webmanifest", "./favicon.ico",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-maskable-192.png", "./icons/icon-maskable-512.png",
@@ -14,6 +14,8 @@ self.addEventListener("activate", (e) => {
 /* Rede primeiro (dados sempre frescos quando online), cache quando offline. */
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET" || new URL(e.request.url).origin !== location.origin) return;
+  /* Cadernos em PDF ficam de fora do cache (são grandes e devem vir da rede). */
+  if (new URL(e.request.url).pathname.toLowerCase().endsWith(".pdf")) return;
   e.respondWith(
     fetch(e.request).then((r) => {
       const copia = r.clone();

@@ -64,6 +64,22 @@ h2.primeiro{margin-top:4px}
 .compartilhar .url-app{margin:10px 0 0;font-size:.85rem;color:var(--texto2);word-break:break-all}
 .aviso-copia{margin:8px 0 0;font-size:.85rem;font-weight:650;color:var(--ok)}
 .aviso-copia[hidden]{display:none}
+.lista-provas{display:grid;gap:8px;margin:0 0 18px}
+.prova{display:flex;align-items:center;gap:12px;width:100%;text-align:left;font:inherit;color:var(--texto);background:var(--papel);border:1px solid var(--borda);border-radius:14px;padding:12px 14px;cursor:pointer}
+.prova svg{width:28px;height:28px;flex:none;color:var(--azul2)}
+.prova .nome{flex:1;min-width:0;font-weight:650;line-height:1.3}
+.prova .tam{flex:none;color:var(--texto2);font-size:.8rem;font-variant-numeric:tabular-nums}
+.folha{position:fixed;inset:0;z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.folha[hidden]{display:none}
+.folha-fundo{position:absolute;inset:0;border:0;padding:0;background:rgba(8,20,36,.45);cursor:pointer}
+.folha-painel{position:relative;width:min(420px,100%);background:var(--papel);color:var(--texto);border-radius:16px 16px 0 0;padding:16px 16px calc(env(safe-area-inset-bottom) + 16px);display:grid;gap:8px;box-shadow:0 8px 30px rgba(0,20,40,.25)}
+.folha-titulo{margin:0 0 4px;font-weight:700}
+.folha-acao{display:block;width:100%;text-align:center;text-decoration:none;font:inherit;font-size:1rem;font-weight:650;border:0;border-radius:12px;padding:12px 14px;cursor:pointer;background:var(--azul2);color:#fff}
+.folha-acao.secundario{background:transparent;color:var(--texto);border:1px solid var(--borda)}
+@media (min-width:720px){
+  .folha{align-items:center;padding:16px}
+  .folha-painel{border-radius:16px}
+}
 .ok{color:var(--ok);font-weight:600}.abaixo{color:var(--alerta);font-weight:600}
 .titulo-acao{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:28px}
 .titulo-acao h2{margin:0}

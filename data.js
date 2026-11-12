@@ -55,7 +55,28 @@ window.DADOS = {
   provas: {
     "2023": {
       secoes: [
-        { id: "2a-formativa", titulo: "2ª Formativa", itens: [] },
+        { id: "2a-formativa", titulo: "2ª Formativa", itens: [
+          { grupo: "Matemática", titulo: "2º ano – Caderno do estudante", arquivo: "provas/2023/2a-formativa/matematica-2ano-estudante.pdf", bytes: 3705367 },
+          { grupo: "Matemática", titulo: "2º ano – Caderno do aplicador", arquivo: "provas/2023/2a-formativa/matematica-2ano-aplicador.pdf", bytes: 3855516 },
+          { grupo: "Matemática", titulo: "3º ano – Caderno do estudante", arquivo: "provas/2023/2a-formativa/matematica-3ano-estudante.pdf", bytes: 6105666 },
+          { grupo: "Matemática", titulo: "3º ano – Caderno do aplicador", arquivo: "provas/2023/2a-formativa/matematica-3ano-aplicador.pdf", bytes: 6281805 },
+          { grupo: "Matemática", titulo: "4º ano", arquivo: "provas/2023/2a-formativa/matematica-4ano.pdf", bytes: 2602578 },
+          { grupo: "Matemática", titulo: "5º ano", arquivo: "provas/2023/2a-formativa/matematica-5ano.pdf", bytes: 983698 },
+          { grupo: "Matemática", titulo: "6º ano", arquivo: "provas/2023/2a-formativa/matematica-6ano.pdf", bytes: 1194793 },
+          { grupo: "Matemática", titulo: "7º ano", arquivo: "provas/2023/2a-formativa/matematica-7ano.pdf", bytes: 826638 },
+          { grupo: "Matemática", titulo: "8º ano", arquivo: "provas/2023/2a-formativa/matematica-8ano.pdf", bytes: 792866 },
+          { grupo: "Matemática", titulo: "9º ano", arquivo: "provas/2023/2a-formativa/matematica-9ano.pdf", bytes: 876180 },
+          { grupo: "Língua Portuguesa", titulo: "2º ano – Caderno do estudante", arquivo: "provas/2023/2a-formativa/portugues-2ano-estudante.pdf", bytes: 4062318 },
+          { grupo: "Língua Portuguesa", titulo: "2º ano – Caderno do aplicador", arquivo: "provas/2023/2a-formativa/portugues-2ano-aplicador.pdf", bytes: 4275191 },
+          { grupo: "Língua Portuguesa", titulo: "3º ano – Caderno do estudante", arquivo: "provas/2023/2a-formativa/portugues-3ano-estudante.pdf", bytes: 2778019 },
+          { grupo: "Língua Portuguesa", titulo: "3º ano – Caderno do aplicador", arquivo: "provas/2023/2a-formativa/portugues-3ano-aplicador.pdf", bytes: 2989531 },
+          { grupo: "Língua Portuguesa", titulo: "4º ano", arquivo: "provas/2023/2a-formativa/portugues-4ano.pdf", bytes: 2006415 },
+          { grupo: "Língua Portuguesa", titulo: "5º ano", arquivo: "provas/2023/2a-formativa/portugues-5ano.pdf", bytes: 963618 },
+          { grupo: "Língua Portuguesa", titulo: "6º ano", arquivo: "provas/2023/2a-formativa/portugues-6ano.pdf", bytes: 1661077 },
+          { grupo: "Língua Portuguesa", titulo: "7º ano", arquivo: "provas/2023/2a-formativa/portugues-7ano.pdf", bytes: 1666340 },
+          { grupo: "Língua Portuguesa", titulo: "8º ano", arquivo: "provas/2023/2a-formativa/portugues-8ano.pdf", bytes: 1459141 },
+          { grupo: "Língua Portuguesa", titulo: "9º ano", arquivo: "provas/2023/2a-formativa/portugues-9ano.pdf", bytes: 1876347 }
+        ] },
         { id: "3a-formativa", titulo: "3ª Formativa", itens: [] }
       ]
     },
