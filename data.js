@@ -51,9 +51,14 @@ window.DADOS = {
     { titulo: "Resultados oficiais do IDEB", site: "INEP", url: "https://www.gov.br/inep/pt-br/areas-de-atuacao/pesquisas-estatisticas-e-indicadores/ideb/resultados" },
     { titulo: "Metas da educação 2026 e resultados do IDEAR 2025", site: "angra.rj.gov.br · 06/03/2026", url: "https://angra.rj.gov.br/noticias/06-03-2026/angra-entrega-metas-da-educacao-para-escolas-municipais-em-2026-e-lanca-idear-alfa" }
   ],
-  /* Conteúdo de cada ano: acrescente objetos em itens ({ titulo, texto, url }). Vazio = aviso "Em breve". */
+  /* Ano com secoes (id, titulo, itens) ou só itens. Itens vazios = aviso "Em breve". */
   provas: {
-    "2023": { itens: [] },
+    "2023": {
+      secoes: [
+        { id: "2a-formativa", titulo: "2ª Formativa", itens: [] },
+        { id: "3a-formativa", titulo: "3ª Formativa", itens: [] }
+      ]
+    },
     "2024": { itens: [] },
     "2025": { itens: [] }
   },

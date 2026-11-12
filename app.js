@@ -687,11 +687,26 @@
       document.querySelectorAll("#sub-provas button").forEach(function(b){
         b.setAttribute("aria-selected", b.getAttribute("data-ano") === anoProva ? "true" : "false");
       });
-      var textoProva = $("#provas-texto");
       var blocoProva = D.provas && D.provas[anoProva];
-      var itensProva = blocoProva && blocoProva.itens ? blocoProva.itens : [];
-      if (textoProva && !itensProva.length) textoProva.textContent = "Em breve: conteúdo de " + anoProva;
-    }
+      var secoesProva = blocoProva && blocoProva.secoes && blocoProva.secoes.length ? blocoProva.secoes : null;
+      var navSec = $("#sub-provas-secoes");
+      if (navSec) navSec.hidden = !secoesProva;
+      var secaoProva = null;
+      if (secoesProva) {
+        for (var si = 0; si < secoesProva.length; si++) if (secoesProva[si].id === partes[2]) secaoProva = secoesProva[si];
+        if (!secaoProva) secaoProva = secoesProva[0];
+        document.querySelectorAll("#sub-provas-secoes button").forEach(function(b){
+          b.setAttribute("aria-selected", b.getAttribute("data-secao") === secaoProva.id ? "true" : "false");
+        });
+      }
+      var textoProva = $("#provas-texto");
+      if (textoProva) {
+        var itensAtivos = secaoProva ? (secaoProva.itens || []) : (blocoProva && blocoProva.itens ? blocoProva.itens : []);
+        if (!itensAtivos.length) {
+          textoProva.textContent = secaoProva ? "Em breve: conteúdo da " + secaoProva.titulo + " " + anoProva : "Em breve: conteúdo de " + anoProva;
+        }
+      }
+    } else if ($("#sub-provas-secoes")) $("#sub-provas-secoes").hidden = true;
     desenharTudo();
     if (rolar) window.scrollTo(0, 0);
   }
@@ -720,6 +735,17 @@
   document.querySelectorAll("#sub-provas button").forEach(function(b){
     b.addEventListener("click", function(){
       var next = "#provas/" + b.getAttribute("data-ano");
+      if (location.hash !== next) location.hash = next;
+      else aplicarRota(true);
+    });
+  });
+  document.querySelectorAll("#sub-provas-secoes button").forEach(function(b){
+    b.addEventListener("click", function(){
+      var anoAtual = "2023";
+      document.querySelectorAll("#sub-provas button").forEach(function(y){
+        if (y.getAttribute("aria-selected") === "true") anoAtual = y.getAttribute("data-ano");
+      });
+      var next = "#provas/" + anoAtual + "/" + b.getAttribute("data-secao");
       if (location.hash !== next) location.hash = next;
       else aplicarRota(true);
     });
