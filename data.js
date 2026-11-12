@@ -149,7 +149,20 @@ window.DADOS = {
         ] }
       ]
     },
-    "2025": { itens: [] }
+    "2025": {
+      secoes: [
+        { id: "1a-formativa", titulo: "1ª Formativa", itens: [] },
+        { id: "2a-formativa", titulo: "2ª Formativa", itens: [] },
+        { id: "3a-formativa", titulo: "3ª Formativa", itens: [] }
+      ]
+    },
+    "2026": {
+      secoes: [
+        { id: "1a-formativa", titulo: "1ª Formativa", itens: [] },
+        { id: "2a-formativa", titulo: "2ª Formativa", itens: [] },
+        { id: "3a-formativa", titulo: "3ª Formativa", itens: [] }
+      ]
+    }
   },
   /* Texto antigo da aba Provas, guardado e não exibido. */
   provasExemplo: {
