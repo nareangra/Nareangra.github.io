@@ -690,15 +690,18 @@
       var blocoProva = D.provas && D.provas[anoProva];
       var secoesProva = blocoProva && blocoProva.secoes && blocoProva.secoes.length ? blocoProva.secoes : null;
       var navSec = $("#sub-provas-secoes");
-      if (navSec) navSec.hidden = !secoesProva;
       var secaoProva = null;
       if (secoesProva) {
         for (var si = 0; si < secoesProva.length; si++) if (secoesProva[si].id === partes[2]) secaoProva = secoesProva[si];
         if (!secaoProva) secaoProva = secoesProva[0];
-        document.querySelectorAll("#sub-provas-secoes button").forEach(function(b){
-          b.setAttribute("aria-selected", b.getAttribute("data-secao") === secaoProva.id ? "true" : "false");
-        });
-      }
+        if (navSec) {
+          navSec.hidden = false;
+          navSec.setAttribute("aria-label", "Provas de " + anoProva);
+          navSec.innerHTML = secoesProva.map(function(s){
+            return '<button type="button" role="tab" data-secao="' + htmlEsc(s.id) + '" aria-selected="' + (s.id === secaoProva.id ? "true" : "false") + '">' + htmlEsc(s.titulo) + "</button>";
+          }).join("");
+        }
+      } else if (navSec) navSec.hidden = true;
       mostrarProvas(anoProva, secaoProva, blocoProva);
     } else if ($("#sub-provas-secoes")) $("#sub-provas-secoes").hidden = true;
     desenharTudo();
@@ -733,16 +736,17 @@
       else aplicarRota(true);
     });
   });
-  document.querySelectorAll("#sub-provas-secoes button").forEach(function(b){
-    b.addEventListener("click", function(){
-      var anoAtual = "2023";
-      document.querySelectorAll("#sub-provas button").forEach(function(y){
-        if (y.getAttribute("aria-selected") === "true") anoAtual = y.getAttribute("data-ano");
-      });
-      var next = "#provas/" + anoAtual + "/" + b.getAttribute("data-secao");
-      if (location.hash !== next) location.hash = next;
-      else aplicarRota(true);
+  var navSecoesProva = $("#sub-provas-secoes");
+  if (navSecoesProva) navSecoesProva.addEventListener("click", function(ev){
+    var b = ev.target.closest ? ev.target.closest("button[data-secao]") : null;
+    if (!b) return;
+    var anoAtual = "2023";
+    document.querySelectorAll("#sub-provas button").forEach(function(y){
+      if (y.getAttribute("aria-selected") === "true") anoAtual = y.getAttribute("data-ano");
     });
+    var next = "#provas/" + anoAtual + "/" + b.getAttribute("data-secao");
+    if (location.hash !== next) location.hash = next;
+    else aplicarRota(true);
   });
 
   var itensProvaAbertos = [];
