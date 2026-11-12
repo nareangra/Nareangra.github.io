@@ -682,7 +682,7 @@
       } else mostrarListaAvalia();
     } else vistaAvalia = null;
     if (id === "provas") {
-      var anosProva = ["2023", "2024", "2025"];
+      var anosProva = ["2023", "2024", "2025", "2026"];
       var anoProva = anosProva.indexOf(partes[1]) >= 0 ? partes[1] : "2025";
       document.querySelectorAll("#sub-provas button").forEach(function(b){
         b.setAttribute("aria-selected", b.getAttribute("data-ano") === anoProva ? "true" : "false");
