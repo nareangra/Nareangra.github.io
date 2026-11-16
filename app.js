@@ -839,9 +839,9 @@
     var titulo = item.titulo;
     var texto = "Avaliação formativa";
     var caminho = item.arquivo || "";
-    var anoArq = caminho.indexOf("/2024/") >= 0 ? "2024" : "2023";
+    var anoArq = caminho.indexOf("/2026/") >= 0 ? "2026" : caminho.indexOf("/2025/") >= 0 ? "2025" : caminho.indexOf("/2024/") >= 0 ? "2024" : "2023";
     var qual = caminho.indexOf("/1a-formativa/") >= 0 ? "1ª" : caminho.indexOf("/3a-formativa/") >= 0 ? "3ª" : "2ª";
-    texto = qual + " Avaliação Formativa " + anoArq;
+    texto = caminho.indexOf("/fluencia/") >= 0 ? "2ª Avaliação de Fluência em Leitura " + anoArq : qual + " Avaliação Formativa " + anoArq;
     function shareUrl(){
       navigator.share({ title: titulo, text: texto, url: url }).catch(function(err){
         if (err && err.name === "AbortError") return;
