@@ -160,7 +160,8 @@ window.DADOS = {
       secoes: [
         { id: "1a-formativa", titulo: "1ª Formativa", itens: [] },
         { id: "2a-formativa", titulo: "2ª Formativa", itens: [] },
-        { id: "3a-formativa", titulo: "3ª Formativa", itens: [] }
+        { id: "3a-formativa", titulo: "3ª Formativa", itens: [] },
+        { id: "fluencia", titulo: "Fluência", itens: [] }
       ]
     }
   },
