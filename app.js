@@ -649,6 +649,8 @@
     if (subAv) subAv.hidden = id !== "avalia";
     var subPr = $("#sub-provas");
     if (subPr) subPr.hidden = id !== "provas";
+    var subIdear = $("#sub-idear");
+    if (subIdear) subIdear.hidden = id !== "idear";
     var escolas = id === "ideb" && partes[1] === "escolas";
     var escolasAv = id === "avalia" && partes[1] === "escolas";
     var rede = $("#ideb-rede"), painel = $("#ideb-escolas");
@@ -704,6 +706,11 @@
       } else if (navSec) navSec.hidden = true;
       mostrarProvas(anoProva, secaoProva, blocoProva);
     } else if ($("#sub-provas-secoes")) $("#sub-provas-secoes").hidden = true;
+    if (id === "idear") mostrarIdear(partes);
+    else {
+      if ($("#sub-idear-bimestres")) $("#sub-idear-bimestres").hidden = true;
+      if ($("#sub-idear-vista")) $("#sub-idear-vista").hidden = true;
+    }
     desenharTudo();
     if (rolar) window.scrollTo(0, 0);
   }
@@ -736,6 +743,87 @@
       else aplicarRota(true);
     });
   });
+  var anosIdear = ["2024", "2025", "2026"];
+  var bimsIdear = ["1-bimestre", "2-bimestre", "3-bimestre", "4-bimestre"];
+  var nomeBimestre = { "1-bimestre": "1º Bimestre", "2-bimestre": "2º Bimestre", "3-bimestre": "3º Bimestre", "4-bimestre": "4º Bimestre" };
+  function marcarBotoes(sel, attr, valor){
+    document.querySelectorAll(sel).forEach(function(b){
+      b.setAttribute("aria-selected", b.getAttribute(attr) === valor ? "true" : "false");
+    });
+  }
+  function mostrarIdear(partes){
+    var ano = anosIdear.indexOf(partes[1]) >= 0 ? partes[1] : "";
+    var bim = bimsIdear.indexOf(partes[2]) >= 0 ? partes[2] : "";
+    var vista = partes[3] === "rede" || partes[3] === "escolas" ? partes[3] : "";
+    if (!ano) { bim = ""; vista = ""; }
+    if (!bim) vista = "";
+    marcarBotoes("#sub-idear button", "data-ano", ano);
+    var navBim = $("#sub-idear-bimestres");
+    var navVista = $("#sub-idear-vista");
+    if (navBim) navBim.hidden = !ano;
+    if (navVista) navVista.hidden = !bim;
+    marcarBotoes("#sub-idear-bimestres button", "data-bimestre", bim);
+    marcarBotoes("#sub-idear-vista button", "data-vista", vista);
+    var serie = $("#idear-serie");
+    var painel = $("#idear-painel");
+    if (serie) serie.hidden = !!ano;
+    if (!painel) return;
+    if (!ano) { painel.hidden = true; painel.innerHTML = ""; return; }
+    var volta = !bim ? "#idear" : !vista ? "#idear/" + ano : "#idear/" + ano + "/" + bim;
+    var voltaNome = !bim ? "Anos" : !vista ? ano : nomeBimestre[bim];
+    var html = '<button type="button" class="voltar" data-idear-voltar="' + volta + '">← ' + htmlEsc(voltaNome) + "</button>";
+    if (vista) {
+      var vistaNome = vista === "escolas" ? "Escolas" : "Rede";
+      html += '<div class="cartao"><p>Em breve: IDEAR ' + ano + " · " + htmlEsc(nomeBimestre[bim]) + " · " + vistaNome + "</p></div>";
+    }
+    painel.hidden = false;
+    painel.innerHTML = html;
+  }
+  document.querySelectorAll("#sub-idear button").forEach(function(b){
+    b.addEventListener("click", function(){
+      var next = "#idear/" + b.getAttribute("data-ano");
+      if (location.hash !== next) location.hash = next;
+      else aplicarRota(true);
+    });
+  });
+  var navBimestresIdear = $("#sub-idear-bimestres");
+  if (navBimestresIdear) navBimestresIdear.addEventListener("click", function(ev){
+    var b = ev.target.closest ? ev.target.closest("button[data-bimestre]") : null;
+    if (!b) return;
+    var anoAtual = "";
+    document.querySelectorAll("#sub-idear button").forEach(function(y){
+      if (y.getAttribute("aria-selected") === "true") anoAtual = y.getAttribute("data-ano");
+    });
+    if (!anoAtual) return;
+    var next = "#idear/" + anoAtual + "/" + b.getAttribute("data-bimestre");
+    if (location.hash !== next) location.hash = next;
+    else aplicarRota(true);
+  });
+  var navVistaIdear = $("#sub-idear-vista");
+  if (navVistaIdear) navVistaIdear.addEventListener("click", function(ev){
+    var b = ev.target.closest ? ev.target.closest("button[data-vista]") : null;
+    if (!b) return;
+    var anoAtual = "", bimAtual = "";
+    document.querySelectorAll("#sub-idear button").forEach(function(y){
+      if (y.getAttribute("aria-selected") === "true") anoAtual = y.getAttribute("data-ano");
+    });
+    document.querySelectorAll("#sub-idear-bimestres button").forEach(function(y){
+      if (y.getAttribute("aria-selected") === "true") bimAtual = y.getAttribute("data-bimestre");
+    });
+    if (!anoAtual || !bimAtual) return;
+    var next = "#idear/" + anoAtual + "/" + bimAtual + "/" + b.getAttribute("data-vista");
+    if (location.hash !== next) location.hash = next;
+    else aplicarRota(true);
+  });
+  var painelIdear = $("#aba-idear");
+  if (painelIdear) painelIdear.addEventListener("click", function(ev){
+    var b = ev.target.closest ? ev.target.closest("button[data-idear-voltar]") : null;
+    if (!b) return;
+    var next = b.getAttribute("data-idear-voltar");
+    if (location.hash !== next) location.hash = next;
+    else aplicarRota(true);
+  });
+
   var navSecoesProva = $("#sub-provas-secoes");
   if (navSecoesProva) navSecoesProva.addEventListener("click", function(ev){
     var b = ev.target.closest ? ev.target.closest("button[data-secao]") : null;
