@@ -34,9 +34,11 @@
       var d = "", pen = false;
       s.valores.forEach(function(v, i){ if (v === null || !isFinite(v)) { pen = false; return; } d += (pen ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1); pen = true; });
       svg.appendChild(el("path", { d: d, fill: "none", stroke: s.cor, "stroke-width": s.tracejado ? 2 : 3, "stroke-dasharray": s.tracejado ? "6 5" : "none", "stroke-linejoin": "round", "stroke-linecap": "round" }));
-      if (!s.tracejado) s.valores.forEach(function(v, i){
+      if (!s.tracejado || s.pontos) s.valores.forEach(function(v, i){
         if (v === null || !isFinite(v)) return;
-        var c = el("circle", { cx: x(i), cy: y(v), r: 3.5, fill: s.cor }); c.appendChild(el("title", {}, rotulos[i] + ": " + fmt(v))); svg.appendChild(c);
+        var c = el("circle", { cx: x(i), cy: y(v), r: 3.5, fill: s.cor });
+        c.appendChild(el("title", {}, (s.tracejado ? s.nome + " · " : "") + rotulos[i] + ": " + fmt(v)));
+        svg.appendChild(c);
       });
     });
     alvo.appendChild(svg);
@@ -284,6 +286,7 @@
     desenharColuna("AF");
     if (vistaEscola) desenharVistaEscola();
     if (vistaAvalia) desenharGraficoAvalia();
+    desenharComparativos();
   }
   desenharTudo();
   var rz; window.addEventListener("resize", function(){ clearTimeout(rz); rz = setTimeout(desenharTudo, 150); });
@@ -848,9 +851,211 @@
       btn.textContent = rotuloOrdem(id, rotulos[id] || id);
     });
   }
+  var ANOS_HIST = ["2024", "2025", "2026"];
+  var ROTULOS_BIM = ["1º bim", "2º bim", "3º bim", "Resultado final"];
+  var TITULOS_BIM = ["1º bimestre", "2º bimestre", "3º bimestre", "4º bim (resultado do ano)"];
+  var metaAnoComp = "2026";
+  function blocoHist(ano, seg){
+    var h = D.idearHist;
+    return h && h[ano] && h[ano][seg] ? h[ano][seg] : null;
+  }
+  function escolaHist(ano, seg, inep){
+    var b = blocoHist(ano, seg);
+    if (!b || !b.escolas) return null;
+    for (var i = 0; i < b.escolas.length; i++) if (String(b.escolas[i][0]) === String(inep)) return b.escolas[i];
+    return null;
+  }
+  function escolasHist(seg){
+    var map = {}, ids = [];
+    ANOS_HIST.forEach(function(ano){
+      var b = blocoHist(ano, seg);
+      if (!b || !b.escolas) return;
+      b.escolas.forEach(function(e){
+        var id = String(e[0]);
+        if (!map[id]) { map[id] = e[1]; ids.push(id); }
+      });
+    });
+    ids.sort(function(a, b){ return map[a].localeCompare(map[b], "pt"); });
+    return ids.map(function(id){ return { inep: id, nome: map[id] }; });
+  }
+  function estadoComp(){
+    var p = (location.hash || "").replace(/^#/, "").split("/");
+    var chave = p[2] === "finais" ? "finais" : "iniciais";
+    var seg = chave === "finais" ? "anos_finais" : "anos_iniciais";
+    var inep = "";
+    try { inep = p[3] ? decodeURIComponent(p[3]) : ""; } catch (err) { inep = p[3] || ""; }
+    if (inep && !ANOS_HIST.some(function(ano){ return escolaHist(ano, seg, inep); })) inep = "";
+    return { chave: chave, seg: seg, inep: inep };
+  }
+  function hashComp(chave, inep){
+    if (chave !== "finais" && !inep) return "#idear/comparativos";
+    var h = "#idear/comparativos/" + (chave === "finais" ? "finais" : "iniciais");
+    if (inep) h += "/" + encodeURIComponent(inep);
+    return h;
+  }
+  function corAnoHist(ano){
+    if (ano === "2024") return cssVar("--azul2");
+    if (ano === "2025") return cssVar("--teal");
+    return cssVar("--teal2");
+  }
+  function serieComp(st){
+    return ANOS_HIST.map(function(ano){
+      if (!st.inep) {
+        var b = blocoHist(ano, st.seg);
+        return b && b.rede && b.rede.idear ? b.rede.idear.slice() : [null, null, null, null];
+      }
+      var e = escolaHist(ano, st.seg, st.inep);
+      return e ? e[2].slice() : [null, null, null, null];
+    });
+  }
+  function numFim(v){ return v !== null && v !== undefined && isFinite(v); }
+  function htmlComparativos(){
+    if (!D.idearHist) {
+      return '<h2 class="primeiro">Comparativos</h2><div class="cartao"><p>Em breve.</p></div>';
+    }
+    var st = estadoComp();
+    var ini = st.chave !== "finais";
+    var lista = escolasHist(st.seg);
+    var nomeSel = "Rede";
+    if (st.inep) {
+      for (var i = 0; i < lista.length; i++) if (lista[i].inep === st.inep) nomeSel = lista[i].nome;
+    }
+    var html = '<h2 class="primeiro">Comparativos</h2>';
+    html += '<p class="legenda-sec">IDEAR de 2024 a 2026. O 4º bimestre é o resultado final do ano.</p>';
+    html += '<div class="comp-controles">';
+    html += '<div class="seg" role="group" aria-label="Etapa dos comparativos">';
+    html += '<button type="button" data-comp-seg="iniciais" aria-pressed="' + (ini ? "true" : "false") + '">Anos Iniciais</button>';
+    html += '<button type="button" data-comp-seg="finais" aria-pressed="' + (ini ? "false" : "true") + '">Anos Finais</button>';
+    html += "</div>";
+    html += '<div class="comp-escola">';
+    html += '<button type="button" class="comp-escola-btn" id="comp-escola-btn" aria-expanded="false" aria-haspopup="listbox"><span>' + htmlEsc(nomeSel) + '</span><span aria-hidden="true">▾</span></button>';
+    html += '<div class="comp-painel" id="comp-escola-painel" hidden>';
+    html += '<input id="busca-comp" class="busca" type="search" placeholder="Buscar escola" aria-label="Buscar escola" autocomplete="off" enterkeyhint="search">';
+    html += '<button type="button" class="comp-rede" data-comp-escola="rede" aria-selected="' + (st.inep ? "false" : "true") + '">Rede</button>';
+    html += '<div class="comp-lista" id="comp-escola-lista" role="listbox">';
+    lista.forEach(function(e){
+      html += '<button type="button" role="option" data-comp-escola="' + htmlEsc(e.inep) + '" data-busca="' + htmlEsc(semAcento(e.nome)) + '" aria-selected="' + (e.inep === st.inep ? "true" : "false") + '">' + htmlEsc(e.nome) + "</button>";
+    });
+    html += "</div></div></div></div>";
+    html += '<h2>Evolução ao longo do ano</h2>';
+    html += '<div class="cartao"><div id="comp-linha"></div>';
+    html += '<div class="seg" id="comp-meta" role="group" aria-label="Ano da meta" hidden>';
+    ANOS_HIST.forEach(function(ano){
+      html += '<button type="button" data-comp-meta="' + ano + '" aria-pressed="' + (ano === metaAnoComp ? "true" : "false") + '">Meta ' + ano + "</button>";
+    });
+    html += '</div><p class="legenda-sec" id="comp-aguardando" hidden>2026 · Resultado final: aguardando.</p></div>';
+    html += "<h2>Comparação por bimestre entre os anos</h2>";
+    html += '<div id="comp-legenda-barras"></div><div class="grade2">';
+    TITULOS_BIM.forEach(function(titulo, i){
+      html += '<div class="cartao"><h3>' + htmlEsc(titulo) + '</h3><div class="comp-barras" data-bim="' + i + '"></div></div>';
+    });
+    html += '</div><p class="aviso" id="comp-nota"></p>';
+    return html;
+  }
+  function barrasBimestre(alvo, itens, topo){
+    alvo.innerHTML = "";
+    var W = Math.max(260, Math.min(560, alvo.clientWidth || 320));
+    var H = 236, T = 28, B = 50;
+    var n = itens.length, gap = 16;
+    var bw = Math.min(56, (W - 16 - gap * (n + 1)) / n);
+    var usado = n * bw + gap * (n + 1);
+    var x0 = (W - usado) / 2 + gap;
+    var rotulo = itens.map(function(it){
+      return it.ano + ": " + (numFim(it.valor) ? br(it.valor, 1) : "aguardando") + (it.variacao ? ", variação " + it.variacao : "");
+    }).join(". ");
+    var svg = el("svg", { viewBox: "0 0 " + W + " " + H, role: "img", "aria-label": rotulo });
+    var base = H - B;
+    var tx = cssVar("--texto"), tx2 = cssVar("--texto2"), ok = cssVar("--ok"), alerta = cssVar("--alerta");
+    itens.forEach(function(it, i){
+      var x = x0 + i * (bw + gap), cx = x + bw / 2;
+      if (!numFim(it.valor)) {
+        svg.appendChild(el("text", { x: cx, y: base - 16, "text-anchor": "middle", "font-size": 11, fill: tx2 }, "aguardando"));
+      } else {
+        var alt = Math.max(2, (it.valor / topo) * (base - T));
+        var y = base - alt;
+        svg.appendChild(el("rect", { x: x, y: y, width: bw, height: alt, rx: 6, fill: it.cor }));
+        svg.appendChild(el("text", { x: cx, y: Math.max(14, y - 6), "text-anchor": "middle", "font-size": 13, "font-weight": 700, fill: tx }, br(it.valor, 1)));
+      }
+      svg.appendChild(el("text", { x: cx, y: H - 26, "text-anchor": "middle", "font-size": 12, fill: tx2 }, it.ano));
+      if (it.variacao) {
+        var corV = it.variacao.charAt(0) === "+" ? ok : (it.variacao.charAt(0) === "-" ? alerta : tx2);
+        svg.appendChild(el("text", { x: cx, y: H - 10, "text-anchor": "middle", "font-size": 11, "font-weight": 700, fill: corV }, it.variacao));
+      }
+    });
+    alvo.appendChild(svg);
+  }
+  function desenharComparativos(){
+    var alvo = $("#comp-linha");
+    if (!alvo || !$("#aba-idear") || $("#aba-idear").hidden) return;
+    var st = estadoComp();
+    var seriesVal = serieComp(st);
+    var series = ANOS_HIST.map(function(ano, i){
+      return { nome: ano, valores: seriesVal[i], cor: corAnoHist(ano) };
+    });
+    var metaBox = $("#comp-meta");
+    if (metaBox) metaBox.hidden = !st.inep;
+    if (st.inep) {
+      if (ANOS_HIST.indexOf(metaAnoComp) < 0) metaAnoComp = "2026";
+      var metaVals = metaCompValores(st, metaAnoComp);
+      series.push({ nome: "Meta " + metaAnoComp, valores: metaVals, cor: cssVar("--meta"), tracejado: true, pontos: true });
+      if (metaBox) metaBox.querySelectorAll("button").forEach(function(b){
+        b.setAttribute("aria-pressed", b.getAttribute("data-comp-meta") === metaAnoComp ? "true" : "false");
+      });
+    }
+    var nums = [];
+    series.forEach(function(s){ s.valores.forEach(function(v){ if (numFim(v)) nums.push(v); }); });
+    var mm = nums.length ? faixa(nums) : [0, 10];
+    if (mm[0] < 0) mm[0] = 0;
+    if (!(mm[1] > mm[0])) mm[1] = mm[0] + 1;
+    linhas(alvo, ROTULOS_BIM, series, mm[0], mm[1], function(v){ return br(v, 1); }, function(v){ return br(v, 1); });
+    var aguarda = !numFim(seriesVal[ANOS_HIST.indexOf("2026")][3]);
+    var avisoLinha = $("#comp-aguardando");
+    if (avisoLinha) avisoLinha.hidden = !aguarda;
+    var nota = $("#comp-nota");
+    if (nota) nota.textContent = "O 4º bimestre é o resultado oficial do IDEAR no ano." + (aguarda ? " 2026: 4º bimestre ainda não divulgado." : "");
+    var topo = 1;
+    seriesVal.forEach(function(arr){ arr.forEach(function(v){ if (numFim(v) && v > topo) topo = v; }); });
+    topo = topo * 1.18;
+    var leg = $("#comp-legenda-barras");
+    if (leg) {
+      leg.innerHTML = "";
+      leg.className = "leg";
+      ANOS_HIST.forEach(function(ano){
+        var sp = document.createElement("span");
+        var i = document.createElement("i");
+        i.style.background = corAnoHist(ano);
+        sp.appendChild(i);
+        sp.appendChild(document.createTextNode(ano));
+        leg.appendChild(sp);
+      });
+    }
+    document.querySelectorAll(".comp-barras").forEach(function(box){
+      var bi = parseInt(box.getAttribute("data-bim"), 10);
+      var itens = ANOS_HIST.map(function(ano, i){
+        var valor = seriesVal[i][bi];
+        var anterior = i > 0 ? seriesVal[i - 1][bi] : null;
+        var variacaoTxt = numFim(valor) && numFim(anterior) ? variacao(valor, anterior, 1) : "";
+        return { ano: ano, valor: numFim(valor) ? valor : null, variacao: variacaoTxt, cor: corAnoHist(ano) };
+      });
+      barrasBimestre(box, itens, topo);
+    });
+  }
+  function metaCompValores(st, ano){
+    var e = escolaHist(ano, st.seg, st.inep);
+    return e ? e[3].slice() : [null, null, null, null];
+  }
+  function filtrarEscolasComp(){
+    var campo = $("#busca-comp");
+    var q = semAcento(campo ? campo.value.trim() : "");
+    document.querySelectorAll("#comp-escola-lista button").forEach(function(b){
+      var busca = b.getAttribute("data-busca") || "";
+      b.hidden = !!(q && busca.indexOf(q) === -1);
+    });
+  }
   function mostrarIdear(partes){
     var metasOn = partes[1] === "metas";
-    var ano = !metasOn && anosIdear.indexOf(partes[1]) >= 0 ? partes[1] : "";
+    var compOn = partes[1] === "comparativos";
+    var ano = !metasOn && !compOn && anosIdear.indexOf(partes[1]) >= 0 ? partes[1] : "";
     var bim = bimsIdear.indexOf(partes[2]) >= 0 ? partes[2] : "";
     var vista = partes[3] === "rede" || partes[3] === "escolas" ? partes[3] : "";
     if (!ano) { bim = ""; vista = ""; }
@@ -858,6 +1063,8 @@
     marcarBotoes("#sub-idear button[data-ano]", "data-ano", ano);
     var btnMetas = document.querySelector('#sub-idear button[data-idear="metas"]');
     if (btnMetas) btnMetas.setAttribute("aria-selected", metasOn ? "true" : "false");
+    var btnComp = document.querySelector('#sub-idear button[data-idear="comparativos"]');
+    if (btnComp) btnComp.setAttribute("aria-selected", compOn ? "true" : "false");
     var navBim = $("#sub-idear-bimestres");
     var navVista = $("#sub-idear-vista");
     if (navBim) navBim.hidden = !ano;
@@ -872,6 +1079,13 @@
       painel.hidden = false;
       painel.innerHTML = htmlMetas();
       pintarLinhasMetas();
+      return;
+    }
+    if (compOn) {
+      if (serie) serie.hidden = true;
+      if (!painel) return;
+      painel.hidden = false;
+      painel.innerHTML = htmlComparativos();
       return;
     }
     if (serie) serie.hidden = !!ano;
@@ -889,7 +1103,8 @@
   }
   document.querySelectorAll("#sub-idear button").forEach(function(b){
     b.addEventListener("click", function(){
-      var next = b.getAttribute("data-idear") === "metas" ? "#idear/metas" : "#idear/" + b.getAttribute("data-ano");
+      var tipo = b.getAttribute("data-idear");
+      var next = tipo === "metas" ? "#idear/metas" : tipo === "comparativos" ? "#idear/comparativos" : "#idear/" + b.getAttribute("data-ano");
       if (location.hash !== next) location.hash = next;
       else aplicarRota(true);
     });
@@ -943,14 +1158,64 @@
         return;
       }
       var segBtn = t.closest ? t.closest("button[data-metas-seg]") : null;
-      if (!segBtn) return;
-      ordemMetas = { chave: "", dir: 1 };
-      var destino = segBtn.getAttribute("data-metas-seg") === "finais" ? "#idear/metas/finais" : "#idear/metas";
-      if (location.hash !== destino) location.hash = destino;
-      else aplicarRota(true);
+      if (segBtn) {
+        ordemMetas = { chave: "", dir: 1 };
+        var destino = segBtn.getAttribute("data-metas-seg") === "finais" ? "#idear/metas/finais" : "#idear/metas";
+        if (location.hash !== destino) location.hash = destino;
+        else aplicarRota(true);
+        return;
+      }
+      var compSeg = t.closest ? t.closest("button[data-comp-seg]") : null;
+      if (compSeg) {
+        var stSeg = estadoComp();
+        var chaveSeg = compSeg.getAttribute("data-comp-seg");
+        var segNovo = chaveSeg === "finais" ? "anos_finais" : "anos_iniciais";
+        var inepSeg = stSeg.inep && ANOS_HIST.some(function(ano){ return escolaHist(ano, segNovo, stSeg.inep); }) ? stSeg.inep : "";
+        var destSeg = hashComp(chaveSeg, inepSeg);
+        if (location.hash !== destSeg) location.hash = destSeg;
+        else aplicarRota(true);
+        return;
+      }
+      var compEsc = t.closest ? t.closest("button[data-comp-escola]") : null;
+      if (compEsc) {
+        var idEsc = compEsc.getAttribute("data-comp-escola");
+        var destEsc = hashComp(estadoComp().chave, idEsc === "rede" ? "" : idEsc);
+        var painelEsc = $("#comp-escola-painel");
+        if (painelEsc) painelEsc.hidden = true;
+        if (location.hash !== destEsc) location.hash = destEsc;
+        else aplicarRota(true);
+        return;
+      }
+      var compMeta = t.closest ? t.closest("button[data-comp-meta]") : null;
+      if (compMeta) {
+        metaAnoComp = compMeta.getAttribute("data-comp-meta");
+        desenharComparativos();
+        return;
+      }
+      var abreEsc = t.closest ? t.closest("#comp-escola-btn") : null;
+      if (abreEsc) {
+        var listaEsc = $("#comp-escola-painel");
+        if (!listaEsc) return;
+        listaEsc.hidden = !listaEsc.hidden;
+        abreEsc.setAttribute("aria-expanded", listaEsc.hidden ? "false" : "true");
+        if (!listaEsc.hidden) {
+          var campoEsc = $("#busca-comp");
+          if (campoEsc) campoEsc.focus();
+        }
+      }
+    });
+    document.addEventListener("click", function(ev){
+      var listaEsc = $("#comp-escola-painel");
+      if (!listaEsc || listaEsc.hidden) return;
+      if (ev.target.closest && ev.target.closest(".comp-escola")) return;
+      listaEsc.hidden = true;
+      var abre = $("#comp-escola-btn");
+      if (abre) abre.setAttribute("aria-expanded", "false");
     });
     painelIdear.addEventListener("input", function(ev){
-      if (!ev.target || ev.target.id !== "busca-metas") return;
+      if (!ev.target) return;
+      if (ev.target.id === "busca-comp") { filtrarEscolasComp(); return; }
+      if (ev.target.id !== "busca-metas") return;
       buscaMetas = ev.target.value;
       pintarLinhasMetas();
     });
