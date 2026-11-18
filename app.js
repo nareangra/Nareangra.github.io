@@ -1094,12 +1094,180 @@
     var volta = !bim ? "#idear" : !vista ? "#idear/" + ano : "#idear/" + ano + "/" + bim;
     var voltaNome = !bim ? "Anos" : !vista ? ano : nomeBimestre[bim];
     var html = '<button type="button" class="voltar" data-idear-voltar="' + volta + '">← ' + htmlEsc(voltaNome) + "</button>";
-    if (vista) {
-      var vistaNome = vista === "escolas" ? "Escolas" : "Rede";
-      html += '<div class="cartao"><p>Em breve: IDEAR ' + ano + " · " + htmlEsc(nomeBimestre[bim]) + " · " + vistaNome + "</p></div>";
-    }
+    if (vista) html += htmlIdearDetalhe(ano, bim, vista);
     painel.hidden = false;
     painel.innerHTML = html;
+    if (vista === "escolas") pintarTabelaDetalhe();
+  }
+  var buscaDetalhe = "";
+  var ordemDetalhe = { chave: "idear", dir: -1 };
+  var CHAVE_BIM = { "1-bimestre": "b1", "2-bimestre": "b2", "3-bimestre": "b3", "4-bimestre": "b4" };
+  function contextoDetalhe(){
+    var p = (location.hash || "").replace(/^#/, "").split("/");
+    var ano = anosIdear.indexOf(p[1]) >= 0 ? p[1] : "";
+    var bim = bimsIdear.indexOf(p[2]) >= 0 ? p[2] : "";
+    var vista = p[3] === "rede" || p[3] === "escolas" ? p[3] : "";
+    var seg = p[4] === "finais" ? "anos_finais" : "anos_iniciais";
+    return { ano: ano, bim: bim, vista: vista, seg: seg, chave: CHAVE_BIM[bim] || "" };
+  }
+  function blocoDetalhe(ano, seg){
+    var anos = D.idearDetalhe && D.idearDetalhe.anos;
+    return anos && anos[ano] && anos[ano][seg] ? anos[ano][seg] : null;
+  }
+  function fmtPct(v){
+    if (!numFim(v)) return "—";
+    return Math.round(v * 100) + "%";
+  }
+  function htmlSituacao(idear, meta){
+    if (!numFim(idear) || !numFim(meta)) return "—";
+    var ok = idear >= meta;
+    var cls = ok ? "ok" : "abaixo";
+    var nome = ok ? "Atingiu meta" : "Abaixo da meta";
+    return '<span class="' + cls + '">' + nome + '</span><span class="desvio ' + cls + '">' + variacao(idear, meta, 1) + "</span>";
+  }
+  function cardRede(titulo, b, avisoVazio){
+    if (!b || (!numFim(b.idear) && !numFim(b.p) && !numFim(b.lp) && !numFim(b.mat) && !numFim(b.n))) {
+      return '<div class="cartao"><h3>' + htmlEsc(titulo) + "</h3><p>" + htmlEsc(avisoVazio) + "</p></div>";
+    }
+    var html = '<div class="cartao"><h3>' + htmlEsc(titulo) + '</h3><div class="metrica"><div class="v">' + (numFim(b.idear) ? br(b.idear, 1) : "—") + '</div><div class="l">IDEAR</div></div>';
+    html += '<dl class="props">';
+    html += "<dt>Indicador de rendimento (P)</dt><dd>" + fmtPct(b.p) + "</dd>";
+    html += "<dt>N LP</dt><dd>" + (numFim(b.lp) ? br(b.lp, 1) : "—") + "</dd>";
+    html += "<dt>N MAT</dt><dd>" + (numFim(b.mat) ? br(b.mat, 1) : "—") + "</dd>";
+    html += "<dt>N</dt><dd>" + (numFim(b.n) ? br(b.n, 1) : "—") + "</dd>";
+    html += "</dl></div>";
+    return html;
+  }
+  function avisoSemResultado(ano, bim){
+    return ano === "2026" && bim === "4-bimestre" ? "Resultados do 4º bimestre de 2026 ainda não divulgados" : "Sem dados neste bimestre.";
+  }
+  function htmlIdearDetalhe(ano, bim, vista){
+    var ctx = contextoDetalhe();
+    var oficiais = bim === "4-bimestre" ? '<p class="legenda-sec">Resultado oficial do IDEAR no ano.</p>' : "";
+    if (vista === "rede") {
+      var ai = blocoDetalhe(ano, "anos_iniciais");
+      var af = blocoDetalhe(ano, "anos_finais");
+      var aviso = avisoSemResultado(ano, bim);
+      var html = "<h2>" + htmlEsc(nomeBimestre[bim] + " de " + ano) + "</h2>" + oficiais;
+      html += '<div class="grade2">';
+      html += cardRede("Anos Iniciais", ai && ai.rede ? ai.rede[ctx.chave] : null, aviso);
+      html += cardRede("Anos Finais", af && af.rede ? af.rede[ctx.chave] : null, aviso);
+      html += "</div>";
+      return html;
+    }
+    var ini = ctx.seg !== "anos_finais";
+    var htmlEscTab = '<h2>Escolas · ' + htmlEsc(nomeBimestre[bim] + " de " + ano) + "</h2>" + oficiais;
+    var bloco = blocoDetalhe(ano, ctx.seg);
+    var semIdear = !bloco || !(bloco.escolas || []).some(function(e){ return e[ctx.chave] && numFim(e[ctx.chave].idear); });
+    if (semIdear && ano === "2026" && bim === "4-bimestre") htmlEscTab += '<div class="cartao"><p>' + htmlEsc(avisoSemResultado(ano, bim)) + "</p></div>";
+    htmlEscTab += '<div class="seg" role="group" aria-label="Etapa das escolas">';
+    htmlEscTab += '<button type="button" data-det-seg="iniciais" aria-pressed="' + (ini ? "true" : "false") + '">Anos Iniciais</button>';
+    htmlEscTab += '<button type="button" data-det-seg="finais" aria-pressed="' + (ini ? "false" : "true") + '">Anos Finais</button></div>';
+    htmlEscTab += '<input id="busca-detalhe" class="busca" type="search" placeholder="Buscar escola" aria-label="Buscar escola" autocomplete="off" enterkeyhint="search" value="' + htmlEsc(buscaDetalhe) + '">';
+    htmlEscTab += '<p class="legenda-sec" id="contagem-detalhe"></p>';
+    htmlEscTab += '<div class="tabela-wrap"><table id="tab-idear-det" aria-label="Escolas do IDEAR"><thead><tr>';
+    var cols = [
+      ["rank", "#"], ["nome", "Escola"], ["p", "P"], ["lp", "N LP"], ["mat", "N MAT"], ["n", "N"], ["meta", "Meta"], ["idear", "IDEAR"], ["situacao", "Situação"]
+    ];
+    cols.forEach(function(c){
+      htmlEscTab += '<th aria-sort="none"><button type="button" class="col-btn" data-det-ordem="' + c[0] + '">' + c[1] + "</button></th>";
+    });
+    htmlEscTab += "</tr></thead><tbody></tbody></table></div>";
+    return htmlEscTab;
+  }
+  function valorCampo(e, chave, campo){
+    var b = e[chave];
+    if (!b) return null;
+    var v = b[campo];
+    return numFim(v) ? v : null;
+  }
+  function ranksDetalhe(escolas, chave){
+    var lista = escolas.slice().sort(function(a, b){
+      var va = valorCampo(a, chave, "idear"), vb = valorCampo(b, chave, "idear");
+      if (va === null && vb === null) return a.nome.localeCompare(b.nome, "pt");
+      if (va === null) return 1;
+      if (vb === null) return -1;
+      if (va === vb) return a.nome.localeCompare(b.nome, "pt");
+      return vb - va;
+    });
+    var map = {}, pos = 0;
+    lista.forEach(function(e){
+      if (valorCampo(e, chave, "idear") === null) map[e.inep] = null;
+      else { pos++; map[e.inep] = pos; }
+    });
+    return map;
+  }
+  function listaDetalhe(escolas, chave){
+    var q = semAcento(buscaDetalhe.trim());
+    var lista = escolas.filter(function(e){ return !q || semAcento(e.nome).indexOf(q) !== -1; });
+    var campo = ordemDetalhe.chave;
+    var dir = ordemDetalhe.dir;
+    lista.sort(function(a, b){
+      if (campo === "nome") return a.nome.localeCompare(b.nome, "pt") * dir;
+      if (campo === "rank") {
+        var ra = a._rank, rb = b._rank;
+        if (ra === null && rb === null) return a.nome.localeCompare(b.nome, "pt");
+        if (ra === null) return 1;
+        if (rb === null) return -1;
+        return (ra - rb) * dir;
+      }
+      if (campo === "situacao") {
+        function peso(e){
+          var idear = valorCampo(e, chave, "idear"), meta = valorCampo(e, chave, "meta");
+          if (idear === null || meta === null) return null;
+          return idear >= meta ? 1 : 0;
+        }
+        var pa = peso(a), pb = peso(b);
+        if (pa === null && pb === null) return a.nome.localeCompare(b.nome, "pt");
+        if (pa === null) return 1;
+        if (pb === null) return -1;
+        if (pa === pb) return a.nome.localeCompare(b.nome, "pt");
+        return pa < pb ? -dir : dir;
+      }
+      var va = valorCampo(a, chave, campo), vb = valorCampo(b, chave, campo);
+      if (va === null && vb === null) return a.nome.localeCompare(b.nome, "pt");
+      if (va === null) return 1;
+      if (vb === null) return -1;
+      if (va === vb) return a.nome.localeCompare(b.nome, "pt");
+      return va < vb ? -dir : dir;
+    });
+    return lista;
+  }
+  function pintarTabelaDetalhe(){
+    var tabelaEl = $("#tab-idear-det");
+    if (!tabelaEl) return;
+    var ctx = contextoDetalhe();
+    var bloco = blocoDetalhe(ctx.ano, ctx.seg);
+    var escolas = bloco && bloco.escolas ? bloco.escolas.slice() : [];
+    var ranks = ranksDetalhe(escolas, ctx.chave);
+    escolas.forEach(function(e){ e._rank = ranks[e.inep]; });
+    var lista = listaDetalhe(escolas, ctx.chave);
+    var corpo = "";
+    if (!lista.length) corpo = '<tr><td colspan="9">Nenhuma escola encontrada.</td></tr>';
+    else lista.forEach(function(e){
+      var b = e[ctx.chave] || {};
+      corpo += "<tr><td>" + (e._rank === null || e._rank === undefined ? "—" : e._rank) + "</td>";
+      corpo += "<td>" + htmlEsc(e.nome) + "</td>";
+      corpo += "<td>" + fmtPct(b.p) + "</td>";
+      corpo += "<td>" + (numFim(b.lp) ? br(b.lp, 1) : "—") + "</td>";
+      corpo += "<td>" + (numFim(b.mat) ? br(b.mat, 1) : "—") + "</td>";
+      corpo += "<td>" + (numFim(b.n) ? br(b.n, 1) : "—") + "</td>";
+      corpo += "<td>" + (numFim(b.meta) ? br(b.meta, 1) : "—") + "</td>";
+      corpo += "<td>" + (numFim(b.idear) ? br(b.idear, 1) : "—") + "</td>";
+      corpo += "<td>" + htmlSituacao(b.idear, b.meta) + "</td></tr>";
+    });
+    tabelaEl.querySelector("tbody").innerHTML = corpo;
+    var cont = $("#contagem-detalhe");
+    if (cont) cont.textContent = buscaDetalhe.trim() ? (lista.length + " de " + escolas.length + " escolas") : (escolas.length + " escolas");
+    var rotulos = { rank: "#", nome: "Escola", p: "P", lp: "N LP", mat: "N MAT", n: "N", meta: "Meta", idear: "IDEAR", situacao: "Situação" };
+    tabelaEl.querySelectorAll("th").forEach(function(th){
+      var btn = th.querySelector("button");
+      if (!btn) return;
+      var id = btn.getAttribute("data-det-ordem");
+      var ativo = ordemDetalhe.chave === id;
+      th.setAttribute("aria-sort", ativo ? (ordemDetalhe.dir < 0 ? "descending" : "ascending") : "none");
+      btn.textContent = ativo ? rotulos[id] + (ordemDetalhe.dir < 0 ? " ▾" : " ▴") : rotulos[id];
+    });
   }
   document.querySelectorAll("#sub-idear button").forEach(function(b){
     b.addEventListener("click", function(){
@@ -1202,6 +1370,23 @@
           var campoEsc = $("#busca-comp");
           if (campoEsc) campoEsc.focus();
         }
+        return;
+      }
+      var detSeg = t.closest ? t.closest("button[data-det-seg]") : null;
+      if (detSeg) {
+        buscaDetalhe = "";
+        var ctxDet = contextoDetalhe();
+        var destDet = "#idear/" + ctxDet.ano + "/" + ctxDet.bim + "/escolas" + (detSeg.getAttribute("data-det-seg") === "finais" ? "/finais" : "");
+        if (location.hash !== destDet) location.hash = destDet;
+        else aplicarRota(true);
+        return;
+      }
+      var detOrd = t.closest ? t.closest("button[data-det-ordem]") : null;
+      if (detOrd) {
+        var chDet = detOrd.getAttribute("data-det-ordem");
+        if (ordemDetalhe.chave === chDet) ordemDetalhe.dir = -ordemDetalhe.dir;
+        else ordemDetalhe = { chave: chDet, dir: chDet === "nome" ? 1 : -1 };
+        pintarTabelaDetalhe();
       }
     });
     document.addEventListener("click", function(ev){
@@ -1215,6 +1400,7 @@
     painelIdear.addEventListener("input", function(ev){
       if (!ev.target) return;
       if (ev.target.id === "busca-comp") { filtrarEscolasComp(); return; }
+      if (ev.target.id === "busca-detalhe") { buscaDetalhe = ev.target.value; pintarTabelaDetalhe(); return; }
       if (ev.target.id !== "busca-metas") return;
       buscaMetas = ev.target.value;
       pintarLinhasMetas();

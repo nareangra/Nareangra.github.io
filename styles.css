@@ -89,6 +89,11 @@ h2.primeiro{margin-top:4px}
 #tab-metas th:first-child .col-btn{justify-content:flex-start;text-align:left}
 #tab-metas th:first-child,#tab-metas td:first-child{position:sticky;left:0;z-index:1;background:var(--papel);box-shadow:1px 0 0 var(--borda);white-space:normal;min-width:9rem;max-width:13rem}
 #tab-metas th:not(:first-child),#tab-metas td:not(:first-child){white-space:nowrap}
+#tab-idear-det .col-btn{padding:8px 2px}
+#tab-idear-det th:nth-child(2) .col-btn{justify-content:flex-start;text-align:left}
+#tab-idear-det th:nth-child(2),#tab-idear-det td:nth-child(2){position:sticky;left:0;z-index:1;background:var(--papel);box-shadow:1px 0 0 var(--borda);white-space:normal;min-width:9rem;max-width:14rem;text-align:left}
+#tab-idear-det td:nth-child(1){font-weight:700;color:var(--texto2)}
+.desvio{display:block;font-size:.78rem;font-weight:700;margin-top:2px}
 .comp-controles{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;margin:0 0 14px}
 .comp-escola{position:relative;flex:1 1 240px;min-width:min(100%,240px)}
 .comp-escola-btn{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;text-align:left;font:inherit;font-size:1rem;padding:10px 14px;border-radius:12px;border:1px solid var(--borda);background:var(--papel);color:var(--texto);cursor:pointer}
@@ -101,7 +106,7 @@ h2.primeiro{margin-top:4px}
 .comp-lista button[hidden]{display:none}
 .comp-lista button[aria-selected="true"],.comp-rede[aria-selected="true"]{background:color-mix(in srgb, var(--azul2) 14%, transparent);color:var(--azul2);font-weight:650}
 .comp-lista button:hover,.comp-rede:hover{background:color-mix(in srgb, var(--azul2) 8%, transparent)}
-.seg{display:flex;flex-wrap:wrap;gap:4px;background:var(--papel);border:1px solid var(--borda);border-radius:999px;padding:3px}
+.seg{display:flex;flex-wrap:wrap;gap:4px;background:var(--papel);border:1px solid var(--borda);border-radius:999px;padding:3px;margin:0 0 12px}
 .seg[hidden]{display:none}
 #comp-meta{margin-top:10px}
 .seg button{border:0;background:transparent;color:var(--texto);font:inherit;font-size:.85rem;padding:6px 14px;border-radius:999px;cursor:pointer}
