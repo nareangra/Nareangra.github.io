@@ -45,6 +45,15 @@ window.DADOS = {
       ["EJA","1 escola"]
     ]
   },
+  /* Metas da aba IDEAR → Metas. anos vazio = a tela mostra "Em breve".
+     Para publicar, preencha metas.anos. Cada ano pode ter:
+       rede: [ { etapa: "Anos Iniciais", valor: 7.0, unidade: "nota" } ]
+       escolas: [ { nome: "EM Exemplo", inep: "33000000", metas: [ { etapa: "Anos Iniciais", valor: 6.8, unidade: "nota" } ] } ]
+       bimestres: { "1-bimestre": { rede: [ ... ], escolas: [ ... ] }, "2-bimestre": ..., "3-bimestre": ..., "4-bimestre": ... }
+     unidade: "nota" (padrão, duas casas), "pct" (percentual) ou omitida. valor null aparece como "—". */
+  metas: {
+    anos: {}
+  },
   fontes: [
     { titulo: "IDEB de Angra dos Reis", site: "QEdu", url: "https://qedu.org.br/municipio/3300100-angra-dos-reis/ideb" },
     { titulo: "Alfabetização (ICA/Avalia RJ) nos municípios do RJ", site: "QEdu", url: "https://qedu.org.br/uf/33-rio-de-janeiro/explore?aba=alfabetizacao&cidade=angra-dos-reis" },
