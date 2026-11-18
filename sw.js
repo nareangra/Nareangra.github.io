@@ -1,7 +1,7 @@
 /* Service worker: cache para uso offline. Ao atualizar dados, aumente a versão. */
-const CACHE = "indicadores-angra-v25";
+const CACHE = "indicadores-angra-v26";
 const ARQUIVOS = [
-  "./", "./index.html", "./styles.css", "./app.js", "./data.js", "./escolas.js", "./avalia_escolas.js", "./manifest.webmanifest", "./favicon.ico",
+  "./", "./index.html", "./styles.css?v=26", "./app.js?v=26", "./data.js?v=26", "./escolas.js?v=26", "./avalia_escolas.js?v=26", "./manifest.webmanifest", "./favicon.ico",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-maskable-192.png", "./icons/icon-maskable-512.png",
   "./icons/apple-touch-icon.png", "./icons/favicon-32.png", "./icons/logo-96.png"
 ];
@@ -19,7 +19,7 @@ self.addEventListener("fetch", (e) => {
   /* Cadernos em PDF ficam de fora do cache (são grandes e devem vir da rede). */
   if (url.pathname.toLowerCase().endsWith(".pdf")) return;
   e.respondWith(
-    fetch(e.request).then((r) => {
+    fetch(e.request, { cache: "no-store" }).then((r) => {
       const copia = r.clone();
       caches.open(CACHE).then((c) => c.put(e.request, copia));
       return r;
