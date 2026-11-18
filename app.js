@@ -1114,9 +1114,9 @@
     var anos = D.idearDetalhe && D.idearDetalhe.anos;
     return anos && anos[ano] && anos[ano][seg] ? anos[ano][seg] : null;
   }
-  function fmtPct(v){
+  function fmtP(v){
     if (!numFim(v)) return "—";
-    return Math.round(v * 100) + "%";
+    return br(v, 2);
   }
   function htmlSituacao(idear, meta){
     if (!numFim(idear) || !numFim(meta)) return "—";
@@ -1131,7 +1131,7 @@
     }
     var html = '<div class="cartao"><h3>' + htmlEsc(titulo) + '</h3><div class="metrica"><div class="v">' + (numFim(b.idear) ? br(b.idear, 1) : "—") + '</div><div class="l">IDEAR</div></div>';
     html += '<dl class="props">';
-    html += "<dt>Indicador de rendimento (P)</dt><dd>" + fmtPct(b.p) + "</dd>";
+    html += "<dt>Indicador de rendimento (P)</dt><dd>" + fmtP(b.p) + "</dd>";
     html += "<dt>N LP</dt><dd>" + (numFim(b.lp) ? br(b.lp, 1) : "—") + "</dd>";
     html += "<dt>N MAT</dt><dd>" + (numFim(b.mat) ? br(b.mat, 1) : "—") + "</dd>";
     html += "<dt>N</dt><dd>" + (numFim(b.n) ? br(b.n, 1) : "—") + "</dd>";
@@ -1248,7 +1248,7 @@
       var b = e[ctx.chave] || {};
       corpo += "<tr><td>" + (e._rank === null || e._rank === undefined ? "—" : e._rank) + "</td>";
       corpo += "<td>" + htmlEsc(e.nome) + "</td>";
-      corpo += "<td>" + fmtPct(b.p) + "</td>";
+      corpo += "<td>" + fmtP(b.p) + "</td>";
       corpo += "<td>" + (numFim(b.lp) ? br(b.lp, 1) : "—") + "</td>";
       corpo += "<td>" + (numFim(b.mat) ? br(b.mat, 1) : "—") + "</td>";
       corpo += "<td>" + (numFim(b.n) ? br(b.n, 1) : "—") + "</td>";
