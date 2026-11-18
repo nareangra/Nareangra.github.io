@@ -45,14 +45,99 @@ window.DADOS = {
       ["EJA","1 escola"]
     ]
   },
-  /* Metas da aba IDEAR → Metas. anos vazio = a tela mostra "Em breve".
-     Para publicar, preencha metas.anos. Cada ano pode ter:
-       rede: [ { etapa: "Anos Iniciais", valor: 7.0, unidade: "nota" } ]
-       escolas: [ { nome: "EM Exemplo", inep: "33000000", metas: [ { etapa: "Anos Iniciais", valor: 6.8, unidade: "nota" } ] } ]
-       bimestres: { "1-bimestre": { rede: [ ... ], escolas: [ ... ] }, "2-bimestre": ..., "3-bimestre": ..., "4-bimestre": ... }
-     unidade: "nota" (padrão, duas casas), "pct" (percentual) ou omitida. valor null aparece como "—". */
+  /* Metas do IDEAR por escola (aba IDEAR → Metas).
+     segmentos.iniciais = Anos Iniciais; segmentos.finais = Anos Finais.
+     Cada escola: inep, nome e metas por ano, com o valor da planilha.
+     A tela mostra duas casas decimais. */
   metas: {
-    anos: {}
+    anos: ["2025", "2026", "2027", "2028"],
+    segmentos: {
+      iniciais: {
+        titulo: "Anos Iniciais",
+        escolas: [
+          { inep: "33036730", nome: "CETI E.M. ALBERTO TORRES", metas: { "2025": 9.3, "2026": 9.0, "2027": 9.0, "2028": 9.0 } },
+          { inep: "33036756", nome: "CETI E.M. ANTONIO JOAQUIM DE OLIVEIRA", metas: { "2025": 6.1, "2026": 6.1, "2027": 6.2793399999999995, "2028": 6.3690089752 } },
+          { inep: "33036772", nome: "E.M. PROF. AMÉLIA ARAÚJO LAGE", metas: { "2025": 5.9, "2026": 5.9670000000000005, "2027": 6.1424298, "2028": 6.230143697544 } },
+          { inep: "33036780", nome: "E.M. DR. LAURO TRAVASSOS", metas: { "2025": 6.7, "2026": 6.7, "2027": 6.89698, "2028": 6.9954688744 } },
+          { inep: "33036799", nome: "E.M. FREI FERNANDO GEURTSE", metas: { "2025": 6.8, "2026": 7.516179915134371, "2027": 7.737155604639321, "2028": 7.84764218667357 } },
+          { inep: "33036802", nome: "CETI E.M. FRANCISCO XAVIER BOTELHO", metas: { "2025": 6.7, "2026": 6.7, "2027": 6.89698, "2028": 6.9954688744 } },
+          { inep: "33036810", nome: "CETI E.M. JOÃO CAROLINO REMEDIOS", metas: { "2025": 7.8, "2026": 7.8, "2027": 8.02932, "2028": 8.1439786896 } },
+          { inep: "33036829", nome: "CETI E.M. MARIA HERCILIA C. DE CASTRO", metas: { "2025": 7.0, "2026": 7.0, "2027": 7.2058, "2028": 7.308698824 } },
+          { inep: "33036837", nome: "E.M. POETA CARLOS D. DE ANDRADE", metas: { "2025": 7.0, "2026": 7.0, "2027": 7.2058, "2028": 7.308698824 } },
+          { inep: "33036845", nome: "CETI E.M. PROF. ADELAIDE FIGUEIRA", metas: { "2025": 10.0, "2026": 9.0, "2027": 9.0, "2028": 9.0 } },
+          { inep: "33036853", nome: "E.M. PROF. ANTONIO JOSÉ NOVAES JORDÃO", metas: { "2025": 7.3, "2026": 7.408799999999999, "2027": 7.62661872, "2028": 7.7355268353216 } },
+          { inep: "33036861", nome: "E.M. PROF. JOSÉ AMÉRICO LOMEU BASTOS", metas: { "2025": 6.6, "2026": 6.667399690402477, "2027": 6.86342124130031, "2028": 6.961430896626078 } },
+          { inep: "33037000", nome: "E.M. BRIGADEIRO NÓBREGA", metas: { "2025": 5.7, "2026": 6.4206, "2027": 6.60936564, "2028": 6.7037473813392 } },
+          { inep: "33037019", nome: "CETI E.M. MONSENHOR PINTO CARVALHO", metas: { "2025": 5.0, "2026": 5.0, "2027": 5.147, "2028": 5.22049916 } },
+          { inep: "33037043", nome: "E.M. ALMIRANTE TAMANDARE", metas: { "2025": 9.04, "2026": 6.8, "2027": 6.9999199999999995, "2028": 7.099878857599999 } },
+          { inep: "33037051", nome: "E.M. ANGELO FRANCISCO JERONIMO", metas: { "2025": 6.65, "2026": 6.9768, "2027": 7.18191792, "2028": 7.2844757078976 } },
+          { inep: "33037060", nome: "E.M. AUREA PIRES DA GAMA", metas: { "2025": 5.34, "2026": 5.545873724007562, "2027": 5.708922411493384, "2028": 5.7904458235295095 } },
+          { inep: "33037078", nome: "E.M. CACIQUE CUNHÃBEBE", metas: { "2025": 5.12, "2026": 6.27249552238806, "2027": 6.456906890746269, "2028": 6.549111521146125 } },
+          { inep: "33037086", nome: "E.M. DOM PEDRO I", metas: { "2025": 5.96, "2026": 6.248250171821306, "2027": 6.431948726872853, "2028": 6.523796954692597 } },
+          { inep: "33037094", nome: "E.M. DR. ORLANDO GONÇALVES", metas: { "2025": 4.86, "2026": 4.9, "2027": 5.04406, "2028": 5.1160891768 } },
+          { inep: "33037108", nome: "CETI E M DE EDUCACAO EMPREENDEDORA FREI JOAO MOREIRA", metas: { "2025": 6.95, "2026": 7.486933237822351, "2027": 7.707049075014328, "2028": 7.817105735805533 } },
+          { inep: "33037116", nome: "E.M. CECÍLIA MARA EDILEUS VIEIRA", metas: { "2025": 6.87, "2026": 6.9, "2027": 7.102860000000001, "2028": 7.2042888408 } },
+          { inep: "33037124", nome: "E.M. JOAQUINA MARIA R. SANTOS", metas: { "2025": 6.12, "2026": 6.7392, "2027": 6.93733248, "2028": 7.0363975878144 } },
+          { inep: "33037132", nome: "E.M. MAURO SERGIO DA CUNHA", metas: { "2025": 4.89, "2026": 4.9, "2027": 5.04406, "2028": 5.1160891768 } },
+          { inep: "33037140", nome: "CETI E.M. PREFEITO FRANCISCO PEREIRA ROCHA", metas: { "2025": 6.89, "2026": 6.9, "2027": 7.102860000000001, "2028": 7.2042888408 } },
+          { inep: "33037159", nome: "E.M. PREF. TOSCANO DE BRITTO", metas: { "2025": 6.72, "2026": 6.7, "2027": 6.89698, "2028": 6.9954688744 } },
+          { inep: "33037167", nome: "E.M. PRINCESA IZABEL", metas: { "2025": 5.39, "2026": 5.4, "2027": 5.55876, "2028": 5.6381390928 } },
+          { inep: "33037183", nome: "E.M. PROF. FRANCISCO DE A. OLIVEIRA DINIZ", metas: { "2025": 5.98, "2026": 6.188400000000001, "2027": 6.370338960000001, "2028": 6.461307400348801 } },
+          { inep: "33037191", nome: "E.M. PROF. URURAHY", metas: { "2025": 7.17, "2026": 7.375835897435897, "2027": 7.592685472820512, "2028": 7.701109021372389 } },
+          { inep: "33037205", nome: "E.M. SANTOS DUMONT", metas: { "2025": 5.47, "2026": 5.934921985815603, "2027": 6.109408692198581, "2028": 6.196651048323177 } },
+          { inep: "33037280", nome: "CETI E.M. DEPUTADO CÂMARA TORRES", metas: { "2025": 9.76, "2026": 9.0, "2027": 9.0, "2028": 9.0 } },
+          { inep: "33037299", nome: "E.M. PROF. SYLVIO DE CASTRO GALINDO", metas: { "2025": 6.23, "2026": 6.9135687987519505, "2027": 7.116827721435258, "2028": 7.218456021297354 } },
+          { inep: "33037302", nome: "E.M. MARECHAL DUTRA", metas: { "2025": 8.12, "2026": 8.1, "2027": 8.33814, "2028": 8.4572086392 } },
+          { inep: "33037310", nome: "E.M. RAUL POMPÉIA", metas: { "2025": 5.96, "2026": 6.4314, "2027": 6.62048316, "2028": 6.7150236595248 } },
+          { inep: "33037353", nome: "E.M. FREI BERNARDO", metas: { "2025": 5.79, "2026": 5.8, "2027": 5.97052, "2028": 6.0557790256 } },
+          { inep: "33037361", nome: "CETI E.M. INÁCIO DURING", metas: { "2025": 6.92, "2026": 6.9, "2027": 7.102860000000001, "2028": 7.2042888408 } },
+          { inep: "33037370", nome: "E.M. NOVA PEREQUÊ", metas: { "2025": 5.98, "2026": 6.0, "2027": 6.1764, "2028": 6.264598992 } },
+          { inep: "33037396", nome: "CETI E.M. BRASIL DOS REIS", metas: { "2025": 9.72, "2026": 9.0, "2027": 9.0, "2028": 9.0 } },
+          { inep: "33037400", nome: "CETI E.M. JOSÉ VIRGÍLIO PEREIRA MAIA", metas: { "2025": 7.65, "2026": 7.8678, "2027": 8.09911332, "2028": 8.2147686582096 } },
+          { inep: "33037418", nome: "E.M. GAL. SILVESTRE TRAVASSOS", metas: { "2025": 5.86, "2026": 7.025399999999999, "2027": 7.23194676, "2028": 7.335218959732799 } },
+          { inep: "33037426", nome: "CETI E.M. JOAQUIM ALVES DE BRITO", metas: { "2025": 6.87, "2026": 6.9, "2027": 7.102860000000001, "2028": 7.2042888408 } },
+          { inep: "33037442", nome: "CETI E.M. OSÓRIO MANOEL CORREA", metas: { "2025": 8.62, "2026": 8.6, "2027": 8.85284, "2028": 8.979258555200001 } },
+          { inep: "33037450", nome: "E.M. PEDRO SOARES", metas: { "2025": 5.15, "2026": 5.1, "2027": 5.24994, "2028": 5.324909143199999 } },
+          { inep: "33037469", nome: "CETI E.M. AYRTON SENNA DA SILVA", metas: { "2025": 9.65, "2026": 9.0, "2027": 9.0, "2028": 9.0 } },
+          { inep: "33037477", nome: "CETI E.M. THOMAZ H. MAC-CORMICK", metas: { "2025": 10.0, "2026": 9.0, "2027": 9.0, "2028": 9.0 } },
+          { inep: "33098069", nome: "E.M. PROF.TÂNIA RITA DE O. TEIXEIRA", metas: { "2025": 5.24, "2026": 6.102, "2027": 6.281398800000001, "2028": 6.371097174864 } },
+          { inep: "33146500", nome: "E.M. PREF. JOSE LUIZ RIBEIRO RESECK", metas: { "2025": 6.04, "2026": 6.16523058419244, "2027": 6.3464883633676985, "2028": 6.437116217196589 } },
+          { inep: "33153540", nome: "E.M. CORNELIS VEROLME", metas: { "2025": 6.73, "2026": 7.003799999999999, "2027": 7.209711719999999, "2028": 7.3126664033615985 } },
+          { inep: "33157456", nome: "E.M. MORADA DO BRACUHY", metas: { "2025": 4.5, "2026": 6.8, "2027": 6.9999199999999995, "2028": 7.099878857599999 } },
+          { inep: "33159424", nome: "E.M. REGINA CÉLIA MONTEIRO PEREIRA", metas: { "2025": 7.47, "2026": 7.576200000000001, "2027": 7.798940280000001, "2028": 7.910309147198401 } },
+          { inep: "33162883", nome: "E.M. PROF. MANOELINA RODRIGUES BARBOSA", metas: { "2025": 7.05, "2026": 7.246800000000001, "2027": 7.459855920000002, "2028": 7.566382662537602 } },
+          { inep: "33177813", nome: "CETI E.M. ZITA DE OLIVEIRA SOARES", metas: { "2025": 6.49, "2026": 6.5, "2027": 6.6911, "2028": 6.786648907999999 } },
+          { inep: "33191360", nome: "E.M. PREF. JOÃO GREGÓRIO GALINDO", metas: { "2025": 7.3, "2026": 7.3, "2027": 7.51462, "2028": 7.6219287736 } },
+          { inep: "33191530", nome: "E.M. VENERA SILVIA DE AGUIAR", metas: { "2025": 5.86, "2026": 5.9, "2027": 6.073460000000001, "2028": 6.160189008800001 } },
+          { inep: "33439389", nome: "E.M. MANOEL RAMOS", metas: { "2025": 6.17, "2026": 6.6743999999999994, "2027": 6.870627359999999, "2028": 6.968739918700799 } },
+        ]
+      },
+      finais: {
+        titulo: "Anos Finais",
+        escolas: [
+          { inep: "33036748", nome: "E.M. ALEXINA LOWNDES", metas: { "2025": 4.9, "2026": 4.9, "2027": 5.10384, "2028": 5.4100703999999995 } },
+          { inep: "33036764", nome: "E.M. BENEDITO DOS SANTOS BARBOSA", metas: { "2025": 4.65, "2026": 4.7, "2027": 4.90384, "2028": 5.1980704 } },
+          { inep: "33036772", nome: "E.M. PROF. AMÉLIA ARAÚJO LAGE", metas: { "2025": 4.64, "2026": 4.6, "2027": 4.803839999999999, "2028": 5.092070399999999 } },
+          { inep: "33037000", nome: "E.M. BRIGADEIRO NÓBREGA", metas: { "2025": 4.8, "2026": 4.8, "2027": 5.003839999999999, "2028": 5.3040704 } },
+          { inep: "33037060", nome: "E.M. AUREA PIRES DA GAMA", metas: { "2025": 4.45, "2026": 4.5, "2027": 4.70384, "2028": 4.986070399999999 } },
+          { inep: "33037078", nome: "E.M. CACIQUE CUNHÃBEBE", metas: { "2025": 4.26, "2026": 4.266779614325069, "2027": 4.470619614325068, "2028": 4.738856791184572 } },
+          { inep: "33037086", nome: "E.M. DOM PEDRO I", metas: { "2025": 4.17, "2026": 4.2, "2027": 4.40384, "2028": 4.6680703999999995 } },
+          { inep: "33037132", nome: "E.M. MAURO SERGIO DA CUNHA", metas: { "2025": 4.0, "2026": 4.009626062322946, "2027": 4.213466062322945, "2028": 4.466274026062322 } },
+          { inep: "33037175", nome: "E.M. PROF. CLEUSA FORTES DE PINHO JORDÃO", metas: { "2025": 4.27, "2026": 4.3, "2027": 4.503839999999999, "2028": 4.774070399999999 } },
+          { inep: "33037221", nome: "E.M. TEREZA PINHEIRO DE ALMEIDA", metas: { "2025": 4.25, "2026": 4.3, "2027": 4.503839999999999, "2028": 4.774070399999999 } },
+          { inep: "33037272", nome: "CETI E M DE EDUCACAO EMPREENDEDORA CEL JOAO PEDRO ALMEIDA", metas: { "2025": 4.8, "2026": 4.9914000000000005, "2027": 5.19524, "2028": 5.5069544 } },
+          { inep: "33037418", nome: "E.M. GAL. SILVESTRE TRAVASSOS", metas: { "2025": 5.2, "2026": 5.4811, "2027": 5.684939999999999, "2028": 6.026036399999999 } },
+          { inep: "33037450", nome: "E.M. PEDRO SOARES", metas: { "2025": 5.29, "2026": 5.3, "2027": 5.503839999999999, "2028": 5.834070399999999 } },
+          { inep: "33098069", nome: "E.M. PROF.TÂNIA RITA DE O. TEIXEIRA", metas: { "2025": 4.11, "2026": 4.1, "2027": 4.303839999999999, "2028": 4.5620704 } },
+          { inep: "33187312", nome: "E.M. JÚLIO CESAR DE ALMEIDA LARANGEIRA", metas: { "2025": 5.03, "2026": 5.0, "2027": 5.20384, "2028": 5.516070399999999 } },
+          { inep: "33191328", nome: "E.M. MARIA THERESA NASCIMENTO GARCIA", metas: { "2025": 4.22, "2026": 4.3, "2027": 4.503839999999999, "2028": 4.774070399999999 } },
+          { inep: "33191360", nome: "E.M. PREF. JOÃO GREGÓRIO GALINDO", metas: { "2025": 4.72, "2026": 4.7, "2027": 4.90384, "2028": 5.1980704 } },
+          { inep: "33191395", nome: "E.M. CHARLES DICKENS", metas: { "2025": 4.88, "2026": 4.9, "2027": 5.10384, "2028": 5.4100703999999995 } },
+          { inep: "33191530", nome: "E.M. VENERA SILVIA DE AGUIAR", metas: { "2025": 5.21, "2026": 5.160438478747203, "2027": 5.364278478747202, "2028": 5.6861351874720345 } },
+          { inep: "33191549", nome: "CETI E.M.C.M. EX COMBATENTE REMO BARAL FILHO", metas: { "2025": 7.01, "2026": 7.0, "2027": 7.20384, "2028": 7.6360703999999995 } },
+        ]
+      }
+    }
   },
   fontes: [
     { titulo: "IDEB de Angra dos Reis", site: "QEdu", url: "https://qedu.org.br/municipio/3300100-angra-dos-reis/ideb" },

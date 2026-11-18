@@ -51,7 +51,7 @@ th.col-ativa,td.col-ativa{background:color-mix(in srgb, var(--azul2) 12%, transp
 .col-grafico h3{color:var(--texto);font-size:1rem}
 h3.etapa-tab{margin-top:22px}
 h2.primeiro{margin-top:4px}
-.busca,#busca-escola{display:block;width:100%;font:inherit;font-size:1rem;padding:12px 14px;border-radius:12px;border:1px solid var(--borda);background:var(--papel);color:var(--texto);margin:0 0 8px}
+.busca,#busca-escola,#busca-metas{display:block;width:100%;font:inherit;font-size:1rem;padding:12px 14px;border-radius:12px;border:1px solid var(--borda);background:var(--papel);color:var(--texto);margin:0 0 8px}
 .lista-escolas,#lista-escolas{display:grid;gap:8px}
 .escola{display:block;width:100%;text-align:left;font:inherit;color:var(--texto);background:var(--papel);border:1px solid var(--borda);border-radius:14px;padding:12px 14px;cursor:pointer}
 .escola[hidden]{display:none}
@@ -84,6 +84,11 @@ h2.primeiro{margin-top:4px}
 .ok{color:var(--ok);font-weight:600}.abaixo{color:var(--alerta);font-weight:600}
 .titulo-acao{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-top:28px}
 .titulo-acao h2{margin:0}
+.metas-topo{margin-top:0}
+#tab-metas .col-btn{padding:8px 4px}
+#tab-metas th:first-child .col-btn{justify-content:flex-start;text-align:left}
+#tab-metas th:first-child,#tab-metas td:first-child{position:sticky;left:0;z-index:1;background:var(--papel);box-shadow:1px 0 0 var(--borda);white-space:normal;min-width:9rem;max-width:13rem}
+#tab-metas th:not(:first-child),#tab-metas td:not(:first-child){white-space:nowrap}
 .seg{display:flex;flex-wrap:wrap;gap:4px;background:var(--papel);border:1px solid var(--borda);border-radius:999px;padding:3px}
 .seg button{border:0;background:transparent;color:var(--texto);font:inherit;font-size:.85rem;padding:6px 14px;border-radius:999px;cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--azul2);color:#fff}
