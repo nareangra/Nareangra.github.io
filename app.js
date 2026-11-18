@@ -829,7 +829,7 @@
         corpo += "<tr><td>" + htmlEsc(e.nome) + "</td>";
         anos.forEach(function(ano){
           var v = valorMeta(e, ano);
-          corpo += "<td>" + (v === null ? "—" : br(v, 2)) + "</td>";
+          corpo += "<td>" + (v === null ? "—" : br(v, 1)) + "</td>";
         });
         corpo += "</tr>";
       });

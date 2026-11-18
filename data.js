@@ -48,7 +48,7 @@ window.DADOS = {
   /* Metas do IDEAR por escola (aba IDEAR → Metas).
      segmentos.iniciais = Anos Iniciais; segmentos.finais = Anos Finais.
      Cada escola: inep, nome e metas por ano, com o valor da planilha.
-     A tela mostra duas casas decimais. */
+     A tela mostra uma casa decimal. */
   metas: {
     anos: ["2025", "2026", "2027", "2028"],
     segmentos: {
