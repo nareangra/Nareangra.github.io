@@ -1416,5 +1416,30 @@
     });
   }
 
-  if ("serviceWorker" in navigator) { window.addEventListener("load", function(){ navigator.serviceWorker.register("sw.js").catch(function(){}); }); }
+  if ("serviceWorker" in navigator) {
+    var swRecarregou = false;
+    navigator.serviceWorker.addEventListener("controllerchange", function(){
+      if (swRecarregou) return;
+      var agora = Date.now();
+      var ultimo = 0;
+      try { ultimo = parseInt(sessionStorage.getItem("sw-reload") || "0", 10) || 0; } catch (err) { ultimo = 0; }
+      if (agora - ultimo < 10000) return;
+      swRecarregou = true;
+      try { sessionStorage.setItem("sw-reload", String(agora)); } catch (err) {}
+      window.location.reload();
+    });
+    function atualizarSw(){
+      navigator.serviceWorker.getRegistration().then(function(reg){
+        if (reg) reg.update().catch(function(){});
+      }).catch(function(){});
+    }
+    window.addEventListener("load", function(){
+      navigator.serviceWorker.register("sw.js", { updateViaCache: "none" }).then(function(reg){
+        return reg.update();
+      }).catch(function(){});
+    });
+    document.addEventListener("visibilitychange", function(){
+      if (document.visibilityState === "visible") atualizarSw();
+    });
+  }
 })();
