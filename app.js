@@ -751,13 +751,89 @@
       b.setAttribute("aria-selected", b.getAttribute(attr) === valor ? "true" : "false");
     });
   }
+  function fmtMeta(item){
+    if (!item || item.valor === null || item.valor === undefined || item.valor === "") return "—";
+    if (typeof item.valor === "number") {
+      if (!isFinite(item.valor)) return "—";
+      if (item.unidade === "pct") return br(item.valor, 1) + "%";
+      return br(item.valor, item.unidade === "nota" || !item.unidade ? 2 : 1);
+    }
+    return htmlEsc(item.valor);
+  }
+  function blocoMetasTemItens(bloco){
+    if (!bloco) return false;
+    if (bloco.rede && bloco.rede.length) return true;
+    if (bloco.escolas && bloco.escolas.length) return true;
+    return false;
+  }
+  function htmlBlocoMetas(bloco){
+    if (!blocoMetasTemItens(bloco)) return "";
+    var html = "";
+    if (bloco.rede && bloco.rede.length) {
+      html += "<h3>Rede</h3><div class=\"tabela-wrap\"><table><thead><tr><th>Etapa</th><th>Meta</th></tr></thead><tbody>";
+      bloco.rede.forEach(function(m){
+        html += "<tr><td>" + htmlEsc(m && m.etapa ? m.etapa : "—") + "</td><td>" + fmtMeta(m) + "</td></tr>";
+      });
+      html += "</tbody></table></div>";
+    }
+    if (bloco.escolas && bloco.escolas.length) {
+      html += "<h3>Escolas</h3><div class=\"tabela-wrap\"><table><thead><tr><th>Escola</th><th>Etapa</th><th>Meta</th></tr></thead><tbody>";
+      bloco.escolas.forEach(function(e){
+        var linhas = e && e.metas && e.metas.length ? e.metas : [{ etapa: "—", valor: null }];
+        linhas.forEach(function(m, i){
+          var nome = i === 0 ? htmlEsc(e && e.nome ? e.nome : "—") : "";
+          html += "<tr><td>" + nome + "</td><td>" + htmlEsc(m && m.etapa ? m.etapa : "—") + "</td><td>" + fmtMeta(m) + "</td></tr>";
+        });
+      });
+      html += "</tbody></table></div>";
+    }
+    return html;
+  }
+  function anoMetasTemConteudo(bloco){
+    if (blocoMetasTemItens(bloco)) return true;
+    var bims = bloco && bloco.bimestres;
+    if (!bims) return false;
+    for (var k in bims) if (Object.prototype.hasOwnProperty.call(bims, k) && blocoMetasTemItens(bims[k])) return true;
+    return false;
+  }
+  function htmlMetas(){
+    var anosMap = D.metas && D.metas.anos ? D.metas.anos : null;
+    var anos = [];
+    if (anosMap) {
+      for (var ano in anosMap) if (Object.prototype.hasOwnProperty.call(anosMap, ano) && anoMetasTemConteudo(anosMap[ano])) anos.push(ano);
+    }
+    anos.sort();
+    if (!anos.length) {
+      return '<h2 class="primeiro">Metas</h2><div class="cartao"><p>Em breve.</p><p>As metas do IDEAR, por ano, bimestre e escola, vão aparecer nesta página.</p></div>';
+    }
+    var html = '<h2 class="primeiro">Metas</h2><p class="legenda-sec">Metas do IDEAR por ano, bimestre e escola.</p>';
+    anos.forEach(function(ano){
+      var bloco = anosMap[ano] || {};
+      html += "<h2>" + htmlEsc(ano) + "</h2>" + htmlBlocoMetas(bloco);
+      var bims = bloco.bimestres || {};
+      var vistos = {};
+      bimsIdear.forEach(function(id){
+        if (!blocoMetasTemItens(bims[id])) return;
+        vistos[id] = true;
+        html += "<h3>" + htmlEsc(nomeBimestre[id] || id) + "</h3>" + htmlBlocoMetas(bims[id]);
+      });
+      Object.keys(bims).forEach(function(id){
+        if (vistos[id] || !blocoMetasTemItens(bims[id])) return;
+        html += "<h3>" + htmlEsc(nomeBimestre[id] || id) + "</h3>" + htmlBlocoMetas(bims[id]);
+      });
+    });
+    return html;
+  }
   function mostrarIdear(partes){
-    var ano = anosIdear.indexOf(partes[1]) >= 0 ? partes[1] : "";
+    var metasOn = partes[1] === "metas";
+    var ano = !metasOn && anosIdear.indexOf(partes[1]) >= 0 ? partes[1] : "";
     var bim = bimsIdear.indexOf(partes[2]) >= 0 ? partes[2] : "";
     var vista = partes[3] === "rede" || partes[3] === "escolas" ? partes[3] : "";
     if (!ano) { bim = ""; vista = ""; }
     if (!bim) vista = "";
-    marcarBotoes("#sub-idear button", "data-ano", ano);
+    marcarBotoes("#sub-idear button[data-ano]", "data-ano", ano);
+    var btnMetas = document.querySelector('#sub-idear button[data-idear="metas"]');
+    if (btnMetas) btnMetas.setAttribute("aria-selected", metasOn ? "true" : "false");
     var navBim = $("#sub-idear-bimestres");
     var navVista = $("#sub-idear-vista");
     if (navBim) navBim.hidden = !ano;
@@ -766,6 +842,13 @@
     marcarBotoes("#sub-idear-vista button", "data-vista", vista);
     var serie = $("#idear-serie");
     var painel = $("#idear-painel");
+    if (metasOn) {
+      if (serie) serie.hidden = true;
+      if (!painel) return;
+      painel.hidden = false;
+      painel.innerHTML = htmlMetas();
+      return;
+    }
     if (serie) serie.hidden = !!ano;
     if (!painel) return;
     if (!ano) { painel.hidden = true; painel.innerHTML = ""; return; }
@@ -781,7 +864,7 @@
   }
   document.querySelectorAll("#sub-idear button").forEach(function(b){
     b.addEventListener("click", function(){
-      var next = "#idear/" + b.getAttribute("data-ano");
+      var next = b.getAttribute("data-idear") === "metas" ? "#idear/metas" : "#idear/" + b.getAttribute("data-ano");
       if (location.hash !== next) location.hash = next;
       else aplicarRota(true);
     });
