@@ -751,78 +751,102 @@
       b.setAttribute("aria-selected", b.getAttribute(attr) === valor ? "true" : "false");
     });
   }
-  function fmtMeta(item){
-    if (!item || item.valor === null || item.valor === undefined || item.valor === "") return "—";
-    if (typeof item.valor === "number") {
-      if (!isFinite(item.valor)) return "—";
-      if (item.unidade === "pct") return br(item.valor, 1) + "%";
-      return br(item.valor, item.unidade === "nota" || !item.unidade ? 2 : 1);
-    }
-    return htmlEsc(item.valor);
+  var buscaMetas = "";
+  var ordemMetas = { chave: "", dir: 1 };
+  function anosDasMetas(){
+    var anos = D.metas && D.metas.anos;
+    return anos && anos.length ? anos : ["2025", "2026", "2027", "2028"];
   }
-  function blocoMetasTemItens(bloco){
-    if (!bloco) return false;
-    if (bloco.rede && bloco.rede.length) return true;
-    if (bloco.escolas && bloco.escolas.length) return true;
-    return false;
+  function idSegmentoMetas(){
+    var p = (location.hash || "").replace(/^#/, "").split("/");
+    return p[0] === "idear" && p[1] === "metas" && p[2] === "finais" ? "finais" : "iniciais";
   }
-  function htmlBlocoMetas(bloco){
-    if (!blocoMetasTemItens(bloco)) return "";
-    var html = "";
-    if (bloco.rede && bloco.rede.length) {
-      html += "<h3>Rede</h3><div class=\"tabela-wrap\"><table><thead><tr><th>Etapa</th><th>Meta</th></tr></thead><tbody>";
-      bloco.rede.forEach(function(m){
-        html += "<tr><td>" + htmlEsc(m && m.etapa ? m.etapa : "—") + "</td><td>" + fmtMeta(m) + "</td></tr>";
-      });
-      html += "</tbody></table></div>";
-    }
-    if (bloco.escolas && bloco.escolas.length) {
-      html += "<h3>Escolas</h3><div class=\"tabela-wrap\"><table><thead><tr><th>Escola</th><th>Etapa</th><th>Meta</th></tr></thead><tbody>";
-      bloco.escolas.forEach(function(e){
-        var linhas = e && e.metas && e.metas.length ? e.metas : [{ etapa: "—", valor: null }];
-        linhas.forEach(function(m, i){
-          var nome = i === 0 ? htmlEsc(e && e.nome ? e.nome : "—") : "";
-          html += "<tr><td>" + nome + "</td><td>" + htmlEsc(m && m.etapa ? m.etapa : "—") + "</td><td>" + fmtMeta(m) + "</td></tr>";
-        });
-      });
-      html += "</tbody></table></div>";
-    }
-    return html;
+  function segmentoMetas(id){
+    var segs = D.metas && D.metas.segmentos;
+    return segs && segs[id] ? segs[id] : null;
   }
-  function anoMetasTemConteudo(bloco){
-    if (blocoMetasTemItens(bloco)) return true;
-    var bims = bloco && bloco.bimestres;
-    if (!bims) return false;
-    for (var k in bims) if (Object.prototype.hasOwnProperty.call(bims, k) && blocoMetasTemItens(bims[k])) return true;
-    return false;
+  function valorMeta(escola, ano){
+    if (!escola || !escola.metas || !Object.prototype.hasOwnProperty.call(escola.metas, ano)) return null;
+    var v = escola.metas[ano];
+    return v === null || v === undefined || !isFinite(v) ? null : v;
+  }
+  function listaMetas(seg){
+    var lista = (seg.escolas || []).slice();
+    var q = semAcento(buscaMetas.trim());
+    if (q) lista = lista.filter(function(e){ return semAcento(e.nome).indexOf(q) !== -1; });
+    var chave = ordemMetas.chave;
+    if (!chave) return lista;
+    var dir = ordemMetas.dir;
+    lista.sort(function(a, b){
+      if (chave === "nome") return a.nome.localeCompare(b.nome, "pt") * dir;
+      var va = valorMeta(a, chave), vb = valorMeta(b, chave);
+      if (va === null && vb === null) return a.nome.localeCompare(b.nome, "pt");
+      if (va === null) return 1;
+      if (vb === null) return -1;
+      if (va === vb) return a.nome.localeCompare(b.nome, "pt");
+      return va < vb ? -dir : dir;
+    });
+    return lista;
+  }
+  function rotuloOrdem(chave, texto){
+    if (ordemMetas.chave !== chave) return texto;
+    return texto + (ordemMetas.dir < 0 ? " ▾" : " ▴");
   }
   function htmlMetas(){
-    var anosMap = D.metas && D.metas.anos ? D.metas.anos : null;
-    var anos = [];
-    if (anosMap) {
-      for (var ano in anosMap) if (Object.prototype.hasOwnProperty.call(anosMap, ano) && anoMetasTemConteudo(anosMap[ano])) anos.push(ano);
+    var seg = segmentoMetas(idSegmentoMetas());
+    if (!seg || !seg.escolas || !seg.escolas.length) {
+      return '<h2 class="primeiro">Metas</h2><div class="cartao"><p>Em breve.</p><p>As metas do IDEAR por escola vão aparecer nesta página.</p></div>';
     }
-    anos.sort();
-    if (!anos.length) {
-      return '<h2 class="primeiro">Metas</h2><div class="cartao"><p>Em breve.</p><p>As metas do IDEAR, por ano, bimestre e escola, vão aparecer nesta página.</p></div>';
-    }
-    var html = '<h2 class="primeiro">Metas</h2><p class="legenda-sec">Metas do IDEAR por ano, bimestre e escola.</p>';
+    var ini = idSegmentoMetas() === "iniciais";
+    var anos = anosDasMetas();
+    var html = '<div class="titulo-acao metas-topo"><h2 class="primeiro">Metas</h2><div class="seg" role="group" aria-label="Etapa das metas">';
+    html += '<button type="button" data-metas-seg="iniciais" aria-pressed="' + (ini ? "true" : "false") + '">Anos Iniciais</button>';
+    html += '<button type="button" data-metas-seg="finais" aria-pressed="' + (ini ? "false" : "true") + '">Anos Finais</button>';
+    html += "</div></div>";
+    html += '<p class="legenda-sec">Metas do IDEAR por escola, de ' + htmlEsc(anos[0]) + " a " + htmlEsc(anos[anos.length - 1]) + ".</p>";
+    html += '<input id="busca-metas" type="search" placeholder="Buscar escola" aria-label="Buscar escola" autocomplete="off" enterkeyhint="search" value="' + htmlEsc(buscaMetas) + '">';
+    html += '<p class="legenda-sec" id="contagem-metas"></p>';
+    html += '<div class="tabela-wrap"><table id="tab-metas" aria-label="Metas por escola"><thead><tr>';
+    html += '<th aria-sort="none"><button type="button" class="col-btn" data-metas-ordem="nome">Unidade</button></th>';
     anos.forEach(function(ano){
-      var bloco = anosMap[ano] || {};
-      html += "<h2>" + htmlEsc(ano) + "</h2>" + htmlBlocoMetas(bloco);
-      var bims = bloco.bimestres || {};
-      var vistos = {};
-      bimsIdear.forEach(function(id){
-        if (!blocoMetasTemItens(bims[id])) return;
-        vistos[id] = true;
-        html += "<h3>" + htmlEsc(nomeBimestre[id] || id) + "</h3>" + htmlBlocoMetas(bims[id]);
-      });
-      Object.keys(bims).forEach(function(id){
-        if (vistos[id] || !blocoMetasTemItens(bims[id])) return;
-        html += "<h3>" + htmlEsc(nomeBimestre[id] || id) + "</h3>" + htmlBlocoMetas(bims[id]);
-      });
+      html += '<th aria-sort="none"><button type="button" class="col-btn" data-metas-ordem="' + htmlEsc(ano) + '">Meta ' + htmlEsc(ano) + "</button></th>";
     });
+    html += "</tr></thead><tbody></tbody></table></div>";
     return html;
+  }
+  function pintarLinhasMetas(){
+    var tabelaEl = $("#tab-metas");
+    if (!tabelaEl) return;
+    var seg = segmentoMetas(idSegmentoMetas());
+    var todas = seg && seg.escolas ? seg.escolas : [];
+    var lista = seg ? listaMetas(seg) : [];
+    var anos = anosDasMetas();
+    var corpo = "";
+    if (!lista.length) {
+      corpo = '<tr><td colspan="' + (anos.length + 1) + '">Nenhuma escola encontrada.</td></tr>';
+    } else {
+      lista.forEach(function(e){
+        corpo += "<tr><td>" + htmlEsc(e.nome) + "</td>";
+        anos.forEach(function(ano){
+          var v = valorMeta(e, ano);
+          corpo += "<td>" + (v === null ? "—" : br(v, 2)) + "</td>";
+        });
+        corpo += "</tr>";
+      });
+    }
+    tabelaEl.querySelector("tbody").innerHTML = corpo;
+    var cont = $("#contagem-metas");
+    if (cont) cont.textContent = buscaMetas.trim() ? (lista.length + " de " + todas.length + " escolas") : (todas.length + " escolas");
+    var rotulos = { nome: "Unidade" };
+    anos.forEach(function(ano){ rotulos[ano] = "Meta " + ano; });
+    tabelaEl.querySelectorAll("th").forEach(function(th){
+      var btn = th.querySelector("button");
+      if (!btn) return;
+      var id = btn.getAttribute("data-metas-ordem");
+      var ativo = ordemMetas.chave === id;
+      th.setAttribute("aria-sort", ativo ? (ordemMetas.dir < 0 ? "descending" : "ascending") : "none");
+      btn.textContent = rotuloOrdem(id, rotulos[id] || id);
+    });
   }
   function mostrarIdear(partes){
     var metasOn = partes[1] === "metas";
@@ -847,6 +871,7 @@
       if (!painel) return;
       painel.hidden = false;
       painel.innerHTML = htmlMetas();
+      pintarLinhasMetas();
       return;
     }
     if (serie) serie.hidden = !!ano;
@@ -899,13 +924,37 @@
     else aplicarRota(true);
   });
   var painelIdear = $("#aba-idear");
-  if (painelIdear) painelIdear.addEventListener("click", function(ev){
-    var b = ev.target.closest ? ev.target.closest("button[data-idear-voltar]") : null;
-    if (!b) return;
-    var next = b.getAttribute("data-idear-voltar");
-    if (location.hash !== next) location.hash = next;
-    else aplicarRota(true);
-  });
+  if (painelIdear) {
+    painelIdear.addEventListener("click", function(ev){
+      var t = ev.target;
+      var voltar = t.closest ? t.closest("button[data-idear-voltar]") : null;
+      if (voltar) {
+        var next = voltar.getAttribute("data-idear-voltar");
+        if (location.hash !== next) location.hash = next;
+        else aplicarRota(true);
+        return;
+      }
+      var ordem = t.closest ? t.closest("button[data-metas-ordem]") : null;
+      if (ordem) {
+        var chave = ordem.getAttribute("data-metas-ordem");
+        if (ordemMetas.chave === chave) ordemMetas.dir = -ordemMetas.dir;
+        else ordemMetas = { chave: chave, dir: chave === "nome" ? 1 : -1 };
+        pintarLinhasMetas();
+        return;
+      }
+      var segBtn = t.closest ? t.closest("button[data-metas-seg]") : null;
+      if (!segBtn) return;
+      ordemMetas = { chave: "", dir: 1 };
+      var destino = segBtn.getAttribute("data-metas-seg") === "finais" ? "#idear/metas/finais" : "#idear/metas";
+      if (location.hash !== destino) location.hash = destino;
+      else aplicarRota(true);
+    });
+    painelIdear.addEventListener("input", function(ev){
+      if (!ev.target || ev.target.id !== "busca-metas") return;
+      buscaMetas = ev.target.value;
+      pintarLinhasMetas();
+    });
+  }
 
   var navSecoesProva = $("#sub-provas-secoes");
   if (navSecoesProva) navSecoesProva.addEventListener("click", function(ev){
