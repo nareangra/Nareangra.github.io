@@ -273,7 +273,8 @@
   tabela($("#tab-avalia"), ["Ano", "Alfabetizados", "Meta", "Participação", "Alunos"],
     D.avaliaRJ.map(function(x){ return [x.ano, br(x.pct) + "%", x.meta === null ? "Sem meta" : br(x.meta) + "%", br(x.part) + "%", x.alunos.toLocaleString("pt-BR")]; }));
 
-  $("#props-idear").innerHTML = D.idear.metas2025.map(function(p){ return "<dt>" + p[0] + "</dt><dd>" + p[1] + "</dd>"; }).join("");
+  var propsIdear = $("#props-idear");
+  if (propsIdear) propsIdear.innerHTML = D.idear.metas2025.map(function(p){ return "<dt>" + p[0] + "</dt><dd>" + p[1] + "</dd>"; }).join("");
 
   D.fontes.push({ titulo: "Divulgação IDEB 2025 por escola", site: "INEP", url: "https://www.gov.br/inep/pt-br/areas-de-atuacao/pesquisas-estatisticas-e-indicadores/ideb/resultados/2005-2025" });
   $("#links-fontes").innerHTML = D.fontes.map(function(f){ return '<a href="' + f.url + '" target="_blank" rel="noopener">' + f.titulo + "<small>" + f.site + "</small></a>"; }).join("");
@@ -709,6 +710,10 @@
       } else if (navSec) navSec.hidden = true;
       mostrarProvas(anoProva, secaoProva, blocoProva);
     } else if ($("#sub-provas-secoes")) $("#sub-provas-secoes").hidden = true;
+    if (id === "idear" && partes[1] !== "metas") {
+      partes = ["idear", "metas"];
+      if (location.hash !== "#idear/metas") location.hash = "#idear/metas";
+    }
     if (id === "idear") mostrarIdear(partes);
     else {
       if ($("#sub-idear-bimestres")) $("#sub-idear-bimestres").hidden = true;
@@ -720,7 +725,7 @@
   abas.forEach(function(b){
     b.addEventListener("click", function(){
       var abaId = b.getAttribute("data-aba");
-      var next = abaId === "provas" ? "#provas/2025" : "#" + abaId;
+      var next = abaId === "provas" ? "#provas/2025" : abaId === "idear" ? "#idear/metas" : "#" + abaId;
       if (location.hash !== next) location.hash = next;
       else aplicarRota(true);
     });

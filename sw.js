@@ -1,7 +1,7 @@
 /* Service worker: cache para uso offline. Ao atualizar dados, aumente a versão. */
-const CACHE = "indicadores-angra-v29";
+const CACHE = "indicadores-angra-v30";
 const ARQUIVOS = [
-  "./", "./index.html", "./styles.css?v=29", "./app.js?v=29", "./data.js?v=29", "./escolas.js?v=29", "./avalia_escolas.js?v=29", "./manifest.webmanifest", "./favicon.ico",
+  "./", "./index.html", "./styles.css?v=30", "./app.js?v=30", "./data.js?v=30", "./escolas.js?v=30", "./avalia_escolas.js?v=30", "./manifest.webmanifest", "./favicon.ico",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-maskable-192.png", "./icons/icon-maskable-512.png",
   "./icons/apple-touch-icon.png", "./icons/favicon-32.png", "./icons/logo-96.png"
 ];

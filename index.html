@@ -16,7 +16,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Indicadores Angra">
   <meta name="application-name" content="Indicadores Angra">
-  <link rel="stylesheet" href="styles.css?v=29">
+  <link rel="stylesheet" href="styles.css?v=30">
 </head>
 <body>
   <header class="topo">
@@ -52,22 +52,8 @@
       <button type="button" role="tab" data-secao="2a-formativa" aria-selected="true">2ª Formativa</button>
       <button type="button" role="tab" data-secao="3a-formativa" aria-selected="false">3ª Formativa</button>
     </nav>
-    <nav class="abas subabas" id="sub-idear" role="tablist" aria-label="Anos, Metas e Comparativos do IDEAR" hidden>
-      <button type="button" role="tab" data-ano="2024" aria-selected="false">2024</button>
-      <button type="button" role="tab" data-ano="2025" aria-selected="false">2025</button>
-      <button type="button" role="tab" data-ano="2026" aria-selected="false">2026</button>
+    <nav class="abas subabas" id="sub-idear" role="tablist" aria-label="Metas do IDEAR" hidden>
       <button type="button" role="tab" data-idear="metas" aria-selected="false">Metas</button>
-      <button type="button" role="tab" data-idear="comparativos" aria-selected="false">Comparativos</button>
-    </nav>
-    <nav class="abas subabas" id="sub-idear-bimestres" role="tablist" aria-label="Bimestres do IDEAR" hidden>
-      <button type="button" role="tab" data-bimestre="1-bimestre" aria-selected="false">1º Bimestre</button>
-      <button type="button" role="tab" data-bimestre="2-bimestre" aria-selected="false">2º Bimestre</button>
-      <button type="button" role="tab" data-bimestre="3-bimestre" aria-selected="false">3º Bimestre</button>
-      <button type="button" role="tab" data-bimestre="4-bimestre" aria-selected="false">4º Bimestre</button>
-    </nav>
-    <nav class="abas subabas" id="sub-idear-vista" role="tablist" aria-label="Rede ou escolas do IDEAR" hidden>
-      <button type="button" role="tab" data-vista="rede" aria-selected="false">Rede</button>
-      <button type="button" role="tab" data-vista="escolas" aria-selected="false">Escolas</button>
     </nav>
   </header>
 
@@ -172,19 +158,6 @@
     </section>
 
     <section class="aba" id="aba-idear" hidden>
-      <div id="idear-serie">
-      <h2>Média do IDEAR na rede municipal</h2>
-      <p class="legenda-sec">Série anual da rede em 2022, 2023, 2024 e 2025, por etapa. A fonte não informa o bimestre, então estes números ficam aqui e não entram em um bimestre.</p>
-      <div class="grade2">
-        <div class="cartao"><h3>Anos Iniciais</h3><div data-grafico="idear-AI"></div></div>
-        <div class="cartao"><h3>Anos Finais</h3><div data-grafico="idear-AF"></div></div>
-      </div>
-      <h2>Resultados de 2025</h2>
-      <dl class="props" id="props-idear"></dl>
-      <h2>O que é o IDEAR</h2>
-      <p>O Índice de Desenvolvimento da Educação de Angra dos Reis é um indicador próprio do município, calculado a partir das avaliações formativas e somativas de Língua Portuguesa e Matemática do sistema AVALIAR da rede municipal. Cada escola recebe metas anuais com base nos seus resultados anteriores. Em 2026 foi lançado o IDEAR-ALFA, voltado ao 2º ano.</p>
-      <p>Fonte: <a href="https://angra.rj.gov.br/noticias/06-03-2026/angra-entrega-metas-da-educacao-para-escolas-municipais-em-2026-e-lanca-idear-alfa" target="_blank" rel="noopener">angra.rj.gov.br, 06/03/2026</a></p>
-      </div>
       <div id="idear-painel" hidden></div>
     </section>
 
@@ -209,10 +182,10 @@
     </section>
   </main>
 
-  <script src="data.js?v=29"></script>
-  <script src="escolas.js?v=29"></script>
-  <script src="avalia_escolas.js?v=29"></script>
-  <script src="app.js?v=29"></script>
+  <script src="data.js?v=30"></script>
+  <script src="escolas.js?v=30"></script>
+  <script src="avalia_escolas.js?v=30"></script>
+  <script src="app.js?v=30"></script>
   <script>
     window.goatcounter = window.goatcounter || {};
     window.goatcounter.path = function () { return location.pathname + location.search + location.hash; };
