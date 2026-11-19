@@ -280,6 +280,392 @@
   $("#links-fontes").innerHTML = D.fontes.map(function(f){ return '<a href="' + f.url + '" target="_blank" rel="noopener">' + f.titulo + "<small>" + f.site + "</small></a>"; }).join("");
   $("#atualizado").textContent = D.atualizado;
 
+  /* IDEAR anual: mesma estrutura do IDEB (rede, escolas e coluna clicável). 2026 fica em branco até o bloco do ano deixar de ser null. */
+  var COLS_ANUAL = [
+    { chave: "p", nome: "P", idx: 0 },
+    { chave: "lp", nome: "N LP", idx: 1 },
+    { chave: "mat", nome: "N MAT", idx: 2 },
+    { chave: "n", nome: "N", idx: 3 },
+    { chave: "meta", nome: "Meta", idx: 4 },
+    { chave: "idear", nome: "IDEAR", idx: 5 }
+  ];
+  var COLS_ANUAL_ESC = [{ chave: "pos", nome: "Posição", idx: -1 }].concat(COLS_ANUAL);
+  var colSelAnual = { AI: null, AF: null };
+  var colSelIdearEsc = { AI: null, AF: null };
+  var serieIdearEsc = { AI: null, AF: null };
+  var vistaIdear = null;
+  var buscaIdear = "";
+  var catalogoIdearCache = null;
+  var ranksIdearCache = null;
+  function anosIdearAnual(){
+    var anos = D.idearAnual && D.idearAnual.anos;
+    return anos && anos.length ? anos : ["2024", "2025", "2026"];
+  }
+  function segDoEt(et){ return et === "AF" ? "finais" : "iniciais"; }
+  function numAnual(v){ return v !== null && v !== undefined && isFinite(v); }
+  function fmt2(v){ return numAnual(v) ? br(v, 2) : "—"; }
+  function anoArr(row, i){
+    var vazio = [null, null, null, null, null, null];
+    var arr = row && row[2 + i];
+    if (!arr) return vazio;
+    for (var k = 0; k < 6; k++) vazio[k] = arr.length > k && arr[k] !== undefined ? arr[k] : null;
+    return vazio;
+  }
+  function situacaoAnual(idear, meta){
+    if (!numAnual(idear)) return "Aguardando resultado";
+    if (!numAnual(meta)) return "—";
+    return idear >= meta ? '<span class="ok">Atingiu</span>' : '<span class="abaixo">Não atingiu</span>';
+  }
+  function textoColAnual(chave, v){
+    if (!numAnual(v)) return "—";
+    if (chave === "pos") return v + "º";
+    return fmt2(v);
+  }
+  function catalogoIdear(){
+    if (catalogoIdearCache) return catalogoIdearCache;
+    var map = {};
+    ["iniciais", "finais"].forEach(function(seg){
+      var escolas = D.idearAnual && D.idearAnual[seg] ? D.idearAnual[seg].escolas : [];
+      escolas.forEach(function(row){
+        var inep = String(row[0]);
+        if (!map[inep]) map[inep] = { inep: inep, nome: row[1], iniciais: null, finais: null };
+        map[inep][seg] = row;
+        if (seg === "iniciais") map[inep].nome = row[1];
+      });
+    });
+    catalogoIdearCache = map;
+    return map;
+  }
+  function ranksIdear(seg){
+    if (!ranksIdearCache) {
+      ranksIdearCache = { iniciais: {}, finais: {} };
+      ["iniciais", "finais"].forEach(function(s){
+        var escolas = D.idearAnual && D.idearAnual[s] ? D.idearAnual[s].escolas : [];
+        anosIdearAnual().forEach(function(ano, i){
+          var lista = [];
+          escolas.forEach(function(row){
+            var idear = anoArr(row, i)[5];
+            if (numAnual(idear)) lista.push({ inep: String(row[0]), nome: row[1], idear: idear });
+          });
+          lista.sort(function(a, b){
+            if (a.idear === b.idear) return a.nome.localeCompare(b.nome, "pt");
+            return b.idear - a.idear;
+          });
+          var mapa = {};
+          lista.forEach(function(e, idx){ mapa[e.inep] = idx + 1; });
+          ranksIdearCache[s][ano] = mapa;
+        });
+      });
+    }
+    return ranksIdearCache[seg] || {};
+  }
+  function linhaRede(et){
+    var seg = segDoEt(et);
+    return D.idearAnual && D.idearAnual[seg] ? D.idearAnual[seg].rede : null;
+  }
+  function serieDeLinha(row, seg, comPos){
+    var anos = anosIdearAnual();
+    var serie = { anos: anos.slice(), p: [], lp: [], mat: [], n: [], meta: [], idear: [], pos: [] };
+    var ranks = comPos && row ? ranksIdear(seg) : null;
+    var inep = row ? String(row[0]) : "";
+    anos.forEach(function(ano, i){
+      var arr = anoArr(row, i);
+      COLS_ANUAL.forEach(function(c){ serie[c.chave].push(numAnual(arr[c.idx]) ? arr[c.idx] : null); });
+      var pos = ranks && ranks[ano] ? ranks[ano][inep] : null;
+      serie.pos.push(numAnual(pos) ? pos : null);
+    });
+    return serie;
+  }
+  function anosComChaves(serie, chaves){
+    var anos = [], idx = [];
+    serie.anos.forEach(function(a, i){
+      var ok = false;
+      chaves.forEach(function(c){ if (numAnual(serie[c][i])) ok = true; });
+      if (ok) { anos.push(a); idx.push(i); }
+    });
+    return { anos: anos, idx: idx };
+  }
+  function escalaAnual(vals){
+    var nums = vals.filter(numAnual);
+    if (!nums.length) return null;
+    var lim = faixa(nums);
+    if (lim[0] < 0) lim[0] = 0;
+    if (!(lim[1] > lim[0])) lim[1] = lim[0] + 1;
+    return lim;
+  }
+  function cabecalhoAnual(cols, et, sufixo){
+    var nome = etapaNome(et);
+    var h = "<thead><tr><th>Edição</th>";
+    cols.forEach(function(col){
+      h += '<th data-col="' + col.chave + '"><button type="button" class="col-btn" data-col="' + col.chave + '" data-etapa="' + et + '" aria-pressed="false" aria-controls="graf-col-idear' + sufixo + "-" + et + '" aria-label="Ver gráfico de ' + col.nome + ", " + nome + '">' + ICO + "<span>" + col.nome + "</span></button></th>";
+    });
+    return h + "<th>Situação</th></tr></thead>";
+  }
+  function corpoAnual(cols, serie, comSituacaoMeta){
+    var h = "<tbody>";
+    serie.anos.forEach(function(a, i){
+      h += "<tr><td>" + a + "</td>";
+      cols.forEach(function(col){
+        h += '<td data-col="' + col.chave + '">' + textoColAnual(col.chave, serie[col.chave][i]) + "</td>";
+      });
+      h += "<td>" + situacaoAnual(serie.idear[i], comSituacaoMeta ? serie.meta[i] : serie.meta[i]) + "</td></tr>";
+    });
+    return h + "</tbody>";
+  }
+  function montarTabelaAnual(et){
+    var tabelaEl = $("#tab-idear-" + et);
+    if (!tabelaEl) return;
+    var serie = serieDeLinha(linhaRede(et), segDoEt(et), false);
+    tabelaEl.innerHTML = cabecalhoAnual(COLS_ANUAL, et, "") + corpoAnual(COLS_ANUAL, serie, true);
+  }
+  function desenharGraficoRedeIdear(et){
+    var alvo = document.querySelector('[data-idear-graf="rede-' + et + '"]');
+    if (!alvo) return;
+    var serie = serieDeLinha(linhaRede(et), segDoEt(et), false);
+    var rec = anosComChaves(serie, ["idear", "meta"]);
+    if (!rec.anos.length) { alvo.innerHTML = '<p class="legenda-sec">Sem resultado publicado.</p>'; return; }
+    var idear = rec.idx.map(function(i){ return serie.idear[i]; });
+    var meta = rec.idx.map(function(i){ return serie.meta[i]; });
+    var lim = escalaAnual(idear.concat(meta));
+    linhas(alvo, rec.anos, [
+      { nome: "IDEAR", valores: idear, cor: cssVar("--azul2") },
+      { nome: "Meta", valores: meta, cor: cssVar("--meta"), tracejado: true }
+    ], lim[0], lim[1], fmt2, fmt2);
+  }
+  function desenharColunaAnual(et){
+    var tabelaEl = $("#tab-idear-" + et), box = $("#graf-col-idear-" + et), chave = colSelAnual[et];
+    if (!tabelaEl || !box) return;
+    tabelaEl.querySelectorAll("th, td").forEach(function(cell){
+      var on = !!chave && cell.getAttribute("data-col") === chave;
+      cell.classList.toggle("col-ativa", on);
+      var b = cell.querySelector("button");
+      if (b) b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    if (!chave) { box.hidden = true; box.innerHTML = ""; return; }
+    var col = null;
+    COLS_ANUAL.forEach(function(item){ if (item.chave === chave) col = item; });
+    var serie = serieDeLinha(linhaRede(et), segDoEt(et), false);
+    var anos = [], vals = [];
+    serie.anos.forEach(function(a, i){
+      var v = serie[chave][i];
+      if (!numAnual(v)) return;
+      anos.push(a); vals.push(v);
+    });
+    box.hidden = false;
+    box.innerHTML = "<h3></h3><div class=\"alvo\"></div>";
+    box.querySelector("h3").textContent = col.nome + " · " + etapaNome(et);
+    if (!vals.length) { box.querySelector(".alvo").innerHTML = '<p class="legenda-sec">Sem valores publicados nesta coluna.</p>'; return; }
+    var lim = escalaAnual(vals);
+    linhas(box.querySelector(".alvo"), anos, [
+      { nome: col.nome, valores: vals, cor: et === "AF" ? cssVar("--teal") : cssVar("--azul2") }
+    ], lim[0], lim[1], fmt2, fmt2);
+  }
+  function desenharIdearAnual(){
+    desenharGraficoRedeIdear("AI");
+    desenharGraficoRedeIdear("AF");
+    desenharColunaAnual("AI");
+    desenharColunaAnual("AF");
+    if (vistaIdear) desenharVistaIdear();
+  }
+  ["AI", "AF"].forEach(function(et){
+    montarTabelaAnual(et);
+    var tab = $("#tab-idear-" + et);
+    if (!tab) return;
+    tab.addEventListener("click", function(ev){
+      var btn = ev.target.closest ? ev.target.closest("button[data-col]") : null;
+      if (!btn) return;
+      var chave = btn.getAttribute("data-col");
+      colSelAnual[et] = colSelAnual[et] === chave ? null : chave;
+      desenharColunaAnual(et);
+      if (colSelAnual[et]) $("#graf-col-idear-" + et).scrollIntoView({ block: "nearest", inline: "nearest" });
+    });
+  });
+  function escolasIdearOrdenadas(){
+    return Object.keys(catalogoIdear()).map(function(k){ return catalogoIdear()[k]; }).sort(function(a, b){
+      return a.nome.localeCompare(b.nome, "pt");
+    });
+  }
+  function acharIdearAnual(id){
+    try { id = decodeURIComponent(id); } catch (err) {}
+    return catalogoIdear()[String(id)] || null;
+  }
+  function ultimoAnual(row){
+    if (!row) return null;
+    var prev = null, last = null;
+    anosIdearAnual().forEach(function(a, i){
+      var v = anoArr(row, i)[5];
+      if (!numAnual(v)) return;
+      prev = last;
+      last = { ano: a, v: v };
+    });
+    return last ? { atual: last, anterior: prev } : null;
+  }
+  function seloIdear(e, seg, rotulo){
+    var row = e[seg];
+    if (!row) return "";
+    var info = ultimoAnual(row);
+    if (!info) return '<span class="selo vazio">' + rotulo + " · aguardando</span>";
+    var rank = (ranksIdear(seg)[info.atual.ano] || {})[e.inep];
+    var txt = rotulo + " " + fmt2(info.atual.v) + " · " + info.atual.ano;
+    if (rank) txt += " · " + rank + "º";
+    return '<span class="selo">' + txt + "</span>";
+  }
+  function pintarListaIdear(){
+    var html = "";
+    escolasIdearOrdenadas().forEach(function(e){
+      var busca = semAcento(e.nome + " " + e.inep);
+      var selos = seloIdear(e, "iniciais", "Iniciais") + seloIdear(e, "finais", "Finais");
+      html += '<button type="button" class="escola" data-idear-escola="' + htmlEsc(e.inep) + '" data-busca="' + htmlEsc(busca) + '"><span class="nome">' + htmlEsc(e.nome) + '</span><span class="selos">' + selos + "</span></button>";
+    });
+    var lista = $("#lista-idear");
+    if (lista) lista.innerHTML = html;
+    filtrarListaIdear();
+  }
+  function filtrarListaIdear(){
+    var q = semAcento(buscaIdear.trim());
+    var vis = 0, total = 0;
+    document.querySelectorAll("#lista-idear .escola").forEach(function(b){
+      total++;
+      var mostra = !q || (b.getAttribute("data-busca") || "").indexOf(q) !== -1;
+      b.hidden = !mostra;
+      if (mostra) vis++;
+    });
+    var cont = $("#contagem-idear");
+    if (cont) cont.textContent = q ? (vis + " de " + total + " escolas") : (total + " escolas");
+  }
+  function mostrarListaIdear(){
+    vistaIdear = null;
+    var det = $("#idear-detalhe"), lista = $("#idear-lista");
+    if (det) det.hidden = true;
+    if (lista) lista.hidden = false;
+    if ($("#lista-idear") && !$("#lista-idear").childElementCount) pintarListaIdear();
+    var campo = $("#busca-idear");
+    if (campo && campo.value !== buscaIdear) campo.value = buscaIdear;
+    filtrarListaIdear();
+  }
+  function montarTabelaIdearEsc(et){
+    var tabelaEl = $("#tab-idear-esc-" + et);
+    var serie = serieIdearEsc[et];
+    if (!tabelaEl || !serie) return;
+    tabelaEl.innerHTML = cabecalhoAnual(COLS_ANUAL_ESC, et, "-esc") + corpoAnual(COLS_ANUAL_ESC, serie, true);
+  }
+  function desenharGraficoIdearEsc(et){
+    var alvo = document.querySelector('[data-idear-graf="esc-' + et + '"]');
+    var serie = serieIdearEsc[et];
+    if (!alvo || !serie) return;
+    var rec = anosComChaves(serie, ["idear", "meta"]);
+    if (!rec.anos.length) { alvo.innerHTML = '<p class="legenda-sec">Sem resultado publicado nesta etapa.</p>'; return; }
+    var idear = rec.idx.map(function(i){ return serie.idear[i]; });
+    var meta = rec.idx.map(function(i){ return serie.meta[i]; });
+    var lim = escalaAnual(idear.concat(meta));
+    linhas(alvo, rec.anos, [
+      { nome: "IDEAR", valores: idear, cor: cssVar("--azul2") },
+      { nome: "Meta", valores: meta, cor: cssVar("--meta"), tracejado: true }
+    ], lim[0], lim[1], fmt2, fmt2);
+  }
+  function desenharColunaIdearEsc(et){
+    var tabelaEl = $("#tab-idear-esc-" + et), box = $("#graf-col-idear-esc-" + et), chave = colSelIdearEsc[et], serie = serieIdearEsc[et];
+    if (!tabelaEl || !box || !serie) return;
+    tabelaEl.querySelectorAll("th, td").forEach(function(cell){
+      var on = !!chave && cell.getAttribute("data-col") === chave;
+      cell.classList.toggle("col-ativa", on);
+      var b = cell.querySelector("button");
+      if (b) b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    if (!chave) { box.hidden = true; box.innerHTML = ""; return; }
+    var col = null;
+    COLS_ANUAL_ESC.forEach(function(item){ if (item.chave === chave) col = item; });
+    var anos = [], vals = [];
+    serie.anos.forEach(function(a, i){
+      var v = serie[chave][i];
+      if (!numAnual(v)) return;
+      anos.push(a); vals.push(v);
+    });
+    box.hidden = false;
+    box.innerHTML = "<h3></h3><div class=\"alvo\"></div>";
+    box.querySelector("h3").textContent = col.nome + " · " + etapaNome(et);
+    if (!vals.length) { box.querySelector(".alvo").innerHTML = '<p class="legenda-sec">Sem valores publicados nesta coluna.</p>'; return; }
+    var lim = chave === "pos" ? faixa(vals) : escalaAnual(vals);
+    var fmtPos = function(v){ return String(Math.round(v)) + "º"; };
+    linhas(box.querySelector(".alvo"), anos, [
+      { nome: col.nome, valores: vals, cor: et === "AF" ? cssVar("--teal") : cssVar("--azul2") }
+    ], lim[0], lim[1], chave === "pos" ? fmtPos : fmt2, chave === "pos" ? fmtPos : fmt2);
+  }
+  function desenharVistaIdear(){
+    if (!vistaIdear) return;
+    desenharGraficoIdearEsc("AI");
+    desenharGraficoIdearEsc("AF");
+    desenharColunaIdearEsc("AI");
+    desenharColunaIdearEsc("AF");
+  }
+  function secaoIdearEtapa(et, row){
+    if (!row) return "";
+    var nome = etapaNome(et);
+    var seg = segDoEt(et);
+    var info = ultimoAnual(row);
+    var cards = "";
+    if (info) {
+      var rank = (ranksIdear(seg)[info.atual.ano] || {})[String(row[0])];
+      var det = info.anterior ? variacao(info.atual.v, info.anterior.v, 2) + " · " + fmt2(info.anterior.v) + " em " + info.anterior.ano : "Sem edição anterior";
+      if (rank) det = rank + "º no ranking · " + det;
+      cards = '<div class="metricas"><div class="metrica"><div class="v">' + fmt2(info.atual.v) + '</div><div class="l">IDEAR ' + nome + " (" + info.atual.ano + ')</div><div class="d">' + det + "</div></div></div>";
+    } else {
+      cards = '<div class="metricas"><div class="metrica"><div class="v">—</div><div class="l">IDEAR ' + nome + '</div><div class="d">Aguardando resultado</div></div></div>';
+    }
+    return "<h2>" + nome + "</h2>" + cards +
+      '<div class="cartao"><h3>Evolução do IDEAR</h3><div data-idear-graf="esc-' + et + '"></div></div>' +
+      '<p class="legenda-sec">Toque o título de uma coluna numérica para ver a evolução. Toque de novo para fechar.</p>' +
+      '<div class="tabela-wrap"><table id="tab-idear-esc-' + et + '"></table></div>' +
+      '<div class="cartao col-grafico" id="graf-col-idear-esc-' + et + '" hidden></div>';
+  }
+  function pintarDetalheIdear(e){
+    serieIdearEsc.AI = e.iniciais ? serieDeLinha(e.iniciais, "iniciais", true) : null;
+    serieIdearEsc.AF = e.finais ? serieDeLinha(e.finais, "finais", true) : null;
+    var corpo = secaoIdearEtapa("AI", e.iniciais) + secaoIdearEtapa("AF", e.finais);
+    if (!corpo) corpo = '<p class="aviso">Sem resultados.</p>';
+    var nome = e.nome;
+    $("#idear-detalhe").innerHTML =
+      '<button type="button" class="voltar" id="btn-voltar-idear">← Escolas</button>' +
+      '<h2 class="primeiro">' + htmlEsc(nome) + "</h2>" +
+      '<p class="legenda-sec">Código INEP ' + htmlEsc(e.inep) + " · rede municipal</p>" + corpo +
+      "<p>P é o indicador de rendimento em decimal. A posição é o ranking da escola pelo IDEAR na etapa, do maior para o menor. Empate no IDEAR segue a ordem do nome.</p>";
+    if (serieIdearEsc.AI) montarTabelaIdearEsc("AI");
+    if (serieIdearEsc.AF) montarTabelaIdearEsc("AF");
+  }
+  function abrirIdearEscola(e){
+    var mesmo = vistaIdear && vistaIdear.inep === e.inep;
+    vistaIdear = e;
+    $("#idear-lista").hidden = true;
+    $("#idear-detalhe").hidden = false;
+    if (!mesmo || !$("#idear-detalhe").querySelector("h2")) {
+      colSelIdearEsc.AI = null;
+      colSelIdearEsc.AF = null;
+      pintarDetalheIdear(e);
+    }
+    desenharVistaIdear();
+  }
+  var painelEscolasIdear = $("#idear-escolas");
+  if (painelEscolasIdear) painelEscolasIdear.addEventListener("click", function(ev){
+    var t = ev.target;
+    var col = t.closest ? t.closest("button[data-col]") : null;
+    if (col) {
+      var et = col.getAttribute("data-etapa");
+      var chave = col.getAttribute("data-col");
+      colSelIdearEsc[et] = colSelIdearEsc[et] === chave ? null : chave;
+      desenharColunaIdearEsc(et);
+      if (colSelIdearEsc[et]) {
+        var box = $("#graf-col-idear-esc-" + et);
+        if (box) box.scrollIntoView({ block: "nearest", inline: "nearest" });
+      }
+      return;
+    }
+    var escolaBtn = t.closest ? t.closest("button[data-idear-escola]") : null;
+    if (escolaBtn) { location.hash = "#idear/escolas/" + escolaBtn.getAttribute("data-idear-escola"); return; }
+    if (t.closest && t.closest("#btn-voltar-idear")) location.hash = "#idear/escolas";
+  });
+  var campoBuscaIdear = $("#busca-idear");
+  if (campoBuscaIdear) campoBuscaIdear.addEventListener("input", function(){ buscaIdear = this.value; filtrarListaIdear(); });
+
   function desenharTudo(){
     desenharSeries();
     colunas($("#graf-avalia"), D.avaliaRJ);
@@ -287,6 +673,7 @@
     desenharColuna("AF");
     if (vistaEscola) desenharVistaEscola();
     if (vistaAvalia) desenharGraficoAvalia();
+    desenharIdearAnual();
     desenharComparativos();
   }
   desenharTudo();
@@ -710,12 +1097,36 @@
       } else if (navSec) navSec.hidden = true;
       mostrarProvas(anoProva, secaoProva, blocoProva);
     } else if ($("#sub-provas-secoes")) $("#sub-provas-secoes").hidden = true;
-    if (id === "idear" && partes[1] !== "metas") {
-      partes = ["idear", "metas"];
-      if (location.hash !== "#idear/metas") location.hash = "#idear/metas";
-    }
-    if (id === "idear") mostrarIdear(partes);
-    else {
+    if (id === "idear") {
+      var p1Idear = partes[1] || "";
+      if (p1Idear && p1Idear !== "metas" && p1Idear !== "escolas" && p1Idear !== "rede") {
+        partes = ["idear"];
+        p1Idear = "";
+        if (location.hash !== "#idear") location.hash = "#idear";
+      }
+      var idearMetas = p1Idear === "metas";
+      var idearEscolas = p1Idear === "escolas";
+      var idearRede = !idearMetas && !idearEscolas;
+      var redeIdear = $("#idear-rede"), escIdear = $("#idear-escolas"), metasIdear = $("#idear-painel");
+      if (redeIdear) redeIdear.hidden = !idearRede;
+      if (escIdear) escIdear.hidden = !idearEscolas;
+      if (metasIdear && !idearMetas) metasIdear.hidden = true;
+      document.querySelectorAll("#sub-idear button").forEach(function(b){
+        var on = (idearMetas && b.getAttribute("data-idear") === "metas") ||
+          (idearEscolas && b.getAttribute("data-vista") === "escolas") ||
+          (idearRede && b.getAttribute("data-vista") === "rede");
+        b.setAttribute("aria-selected", on ? "true" : "false");
+      });
+      if (idearMetas) mostrarIdear(partes);
+      else if (idearEscolas) {
+        var codIdear = partes.slice(2).join("/");
+        if (codIdear) {
+          var encontradaIdear = acharIdearAnual(codIdear);
+          if (encontradaIdear) abrirIdearEscola(encontradaIdear);
+          else { mostrarListaIdear(); var contIdear = $("#contagem-idear"); if (contIdear) contIdear.textContent = "Escola não encontrada. " + contIdear.textContent; }
+        } else mostrarListaIdear();
+      } else vistaIdear = null;
+    } else {
       if ($("#sub-idear-bimestres")) $("#sub-idear-bimestres").hidden = true;
       if ($("#sub-idear-vista")) $("#sub-idear-vista").hidden = true;
     }
@@ -725,7 +1136,7 @@
   abas.forEach(function(b){
     b.addEventListener("click", function(){
       var abaId = b.getAttribute("data-aba");
-      var next = abaId === "provas" ? "#provas/2025" : abaId === "idear" ? "#idear/metas" : "#" + abaId;
+      var next = abaId === "provas" ? "#provas/2025" : "#" + abaId;
       if (location.hash !== next) location.hash = next;
       else aplicarRota(true);
     });
@@ -1277,7 +1688,8 @@
   document.querySelectorAll("#sub-idear button").forEach(function(b){
     b.addEventListener("click", function(){
       var tipo = b.getAttribute("data-idear");
-      var next = tipo === "metas" ? "#idear/metas" : tipo === "comparativos" ? "#idear/comparativos" : "#idear/" + b.getAttribute("data-ano");
+      var vista = b.getAttribute("data-vista");
+      var next = tipo === "metas" ? "#idear/metas" : vista === "escolas" ? "#idear/escolas" : "#idear";
       if (location.hash !== next) location.hash = next;
       else aplicarRota(true);
     });

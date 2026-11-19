@@ -16,7 +16,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Indicadores Angra">
   <meta name="application-name" content="Indicadores Angra">
-  <link rel="stylesheet" href="styles.css?v=30">
+  <link rel="stylesheet" href="styles.css?v=31">
 </head>
 <body>
   <header class="topo">
@@ -52,7 +52,9 @@
       <button type="button" role="tab" data-secao="2a-formativa" aria-selected="true">2ª Formativa</button>
       <button type="button" role="tab" data-secao="3a-formativa" aria-selected="false">3ª Formativa</button>
     </nav>
-    <nav class="abas subabas" id="sub-idear" role="tablist" aria-label="Metas do IDEAR" hidden>
+    <nav class="abas subabas" id="sub-idear" role="tablist" aria-label="Dentro do IDEAR" hidden>
+      <button type="button" role="tab" data-vista="rede" aria-selected="true">IDEAR</button>
+      <button type="button" role="tab" data-vista="escolas" aria-selected="false">Escolas</button>
       <button type="button" role="tab" data-idear="metas" aria-selected="false">Metas</button>
     </nav>
   </header>
@@ -158,6 +160,33 @@
     </section>
 
     <section class="aba" id="aba-idear" hidden>
+      <div id="idear-rede">
+        <h2>IDEAR por etapa: resultado e meta</h2>
+        <p class="legenda-sec">Rede municipal de Angra dos Reis. A rede não tem meta publicada. 2026 ainda não tem resultado.</p>
+        <div class="grade2">
+          <div class="cartao"><h3>Anos Iniciais</h3><div data-idear-graf="rede-AI"></div></div>
+          <div class="cartao"><h3>Anos Finais</h3><div data-idear-graf="rede-AF"></div></div>
+        </div>
+        <h2>Todas as edições</h2>
+        <p class="legenda-sec">Toque o título de uma coluna numérica para ver a evolução. Toque de novo para fechar.</p>
+        <h3>Anos Iniciais</h3>
+        <div class="tabela-wrap"><table id="tab-idear-AI"></table></div>
+        <div class="cartao col-grafico" id="graf-col-idear-AI" hidden></div>
+        <h3 class="etapa-tab">Anos Finais</h3>
+        <div class="tabela-wrap"><table id="tab-idear-AF"></table></div>
+        <div class="cartao col-grafico" id="graf-col-idear-AF" hidden></div>
+        <p>P é o indicador de rendimento, de 0 a 1, sempre em decimal (1,00 ou 0,88), nunca em percentual. N LP e N MAT são as notas de Língua Portuguesa e Matemática. N é a nota padronizada média. IDEAR = N × P.</p>
+      </div>
+      <div id="idear-escolas" hidden>
+        <div id="idear-lista">
+          <h2 class="primeiro">Escolas da rede municipal</h2>
+          <p class="legenda-sec">Resultado anual do IDEAR. 2026 ainda não foi publicado.</p>
+          <input id="busca-idear" type="search" placeholder="Buscar escola" aria-label="Buscar escola" autocomplete="off" enterkeyhint="search">
+          <p class="legenda-sec" id="contagem-idear"></p>
+          <div id="lista-idear"></div>
+        </div>
+        <div id="idear-detalhe" hidden></div>
+      </div>
       <div id="idear-painel" hidden></div>
     </section>
 
@@ -182,10 +211,10 @@
     </section>
   </main>
 
-  <script src="data.js?v=30"></script>
-  <script src="escolas.js?v=30"></script>
-  <script src="avalia_escolas.js?v=30"></script>
-  <script src="app.js?v=30"></script>
+  <script src="data.js?v=31"></script>
+  <script src="escolas.js?v=31"></script>
+  <script src="avalia_escolas.js?v=31"></script>
+  <script src="app.js?v=31"></script>
   <script>
     window.goatcounter = window.goatcounter || {};
     window.goatcounter.path = function () { return location.pathname + location.search + location.hash; };
