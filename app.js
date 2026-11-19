@@ -1602,6 +1602,72 @@
     });
   }
 
+  var formSugestao = $("#form-sugestao");
+  var btnAbrirSugestao = $("#btn-abrir-sugestao");
+  var btnEnviarSugestao = $("#btn-enviar-sugestao");
+  var avisoSugestao = $("#aviso-sugestao");
+  if (btnAbrirSugestao && formSugestao) {
+    btnAbrirSugestao.addEventListener("click", function(){
+      var aberto = formSugestao.hidden;
+      formSugestao.hidden = !aberto;
+      btnAbrirSugestao.setAttribute("aria-expanded", aberto ? "true" : "false");
+      if (aberto) {
+        var campo = formSugestao.querySelector("[name=sugestao]");
+        if (campo) campo.focus();
+      }
+    });
+  }
+  function mostrarAvisoSugestao(texto, ok){
+    if (!avisoSugestao) return;
+    avisoSugestao.textContent = texto;
+    avisoSugestao.className = "aviso-sugestao " + (ok ? "ok" : "erro");
+    avisoSugestao.hidden = false;
+  }
+  if (formSugestao) formSugestao.addEventListener("submit", function(ev){
+    ev.preventDefault();
+    if (!btnEnviarSugestao || btnEnviarSugestao.disabled) return;
+    var nome = (formSugestao.nome.value || "").trim();
+    var email = (formSugestao.email.value || "").trim();
+    var texto = (formSugestao.sugestao.value || "").trim();
+    var honey = (formSugestao._honey.value || "").trim();
+    formSugestao.sugestao.setCustomValidity(texto ? "" : "Escreva sua sugestão.");
+    if (!formSugestao.checkValidity()) { formSugestao.reportValidity(); return; }
+    if (texto.length > 2000) texto = texto.slice(0, 2000);
+    function sucesso(enviada){
+      formSugestao.reset();
+      mostrarAvisoSugestao("Obrigado! Sua sugestão foi enviada.", true);
+      if (enviada && window.goatcounter && window.goatcounter.count) {
+        window.goatcounter.count({ path: "sugestao-enviada", event: true });
+      }
+    }
+    if (honey) { sucesso(false); return; }
+    btnEnviarSugestao.disabled = true;
+    if (avisoSugestao) avisoSugestao.hidden = true;
+    var corpo = {
+      nome: nome,
+      email: email,
+      sugestao: texto,
+      _subject: "Nova sugestão - App Indicadores Angra",
+      _template: "table",
+      _captcha: "false"
+    };
+    if (email) corpo._replyto = email;
+    fetch("https://formsubmit.co/ajax/fabiocasroef48@gmail.com", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify(corpo)
+    }).then(function(r){
+      if (!r.ok) throw new Error("http");
+      return r.json().catch(function(){ return {}; });
+    }).then(function(){
+      sucesso(true);
+    }).catch(function(){
+      mostrarAvisoSugestao("Não foi possível enviar agora. Tente novamente mais tarde.", false);
+    }).then(function(){
+      btnEnviarSugestao.disabled = false;
+    });
+  });
+
   if ("serviceWorker" in navigator) {
     var swRecarregou = false;
     navigator.serviceWorker.addEventListener("controllerchange", function(){

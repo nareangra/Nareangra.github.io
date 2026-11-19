@@ -16,7 +16,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Indicadores Angra">
   <meta name="application-name" content="Indicadores Angra">
-  <link rel="stylesheet" href="styles.css?v=28">
+  <link rel="stylesheet" href="styles.css?v=29">
 </head>
 <body>
   <header class="topo">
@@ -80,6 +80,28 @@
         <div class="cartao"><h3>Anos Iniciais (1º ao 5º ano)</h3><div data-grafico="ideb-AI"></div></div>
         <div class="cartao"><h3>Anos Finais (6º ao 9º ano)</h3><div data-grafico="ideb-AF"></div></div>
       </div>
+      <section class="cartao sugestoes" aria-labelledby="titulo-sugestoes">
+        <h2 id="titulo-sugestoes">Caixa de sugestões</h2>
+        <p>Tem uma ideia para melhorar o app? Mande sua sugestão.</p>
+        <button type="button" class="btn-primario" id="btn-abrir-sugestao" aria-expanded="false" aria-controls="form-sugestao">Enviar sugestão</button>
+        <form id="form-sugestao" hidden>
+          <label class="campo">Nome <span class="opcional">opcional</span>
+            <input name="nome" type="text" maxlength="120" autocomplete="name">
+          </label>
+          <label class="campo">E-mail <span class="opcional">opcional</span>
+            <input name="email" type="email" maxlength="200" autocomplete="email" inputmode="email">
+            <span class="dica">Informe se quiser receber resposta</span>
+          </label>
+          <label class="campo">Sugestão
+            <textarea name="sugestao" required maxlength="2000" rows="5"></textarea>
+          </label>
+          <div class="hp" aria-hidden="true">
+            <label>Deixe em branco<input name="_honey" type="text" tabindex="-1" autocomplete="off"></label>
+          </div>
+          <button type="submit" class="btn-primario" id="btn-enviar-sugestao">Enviar</button>
+          <p id="aviso-sugestao" class="aviso-sugestao" hidden role="status"></p>
+        </form>
+      </section>
       <h2>Como navegar</h2>
       <p>Use os botões no topo para abrir cada indicador. No celular, role a página para ver gráficos e tabelas; tabelas largas podem ser arrastadas para o lado. Para instalar no celular, use "Adicionar à tela inicial" no menu do navegador.</p>
       <div class="compartilhar">
@@ -187,10 +209,10 @@
     </section>
   </main>
 
-  <script src="data.js?v=28"></script>
-  <script src="escolas.js?v=28"></script>
-  <script src="avalia_escolas.js?v=28"></script>
-  <script src="app.js?v=28"></script>
+  <script src="data.js?v=29"></script>
+  <script src="escolas.js?v=29"></script>
+  <script src="avalia_escolas.js?v=29"></script>
+  <script src="app.js?v=29"></script>
   <script>
     window.goatcounter = window.goatcounter || {};
     window.goatcounter.path = function () { return location.pathname + location.search + location.hash; };
