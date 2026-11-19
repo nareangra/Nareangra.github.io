@@ -37,7 +37,7 @@
       if (!s.tracejado || s.pontos) s.valores.forEach(function(v, i){
         if (v === null || !isFinite(v)) return;
         var c = el("circle", { cx: x(i), cy: y(v), r: 3.5, fill: s.cor });
-        c.appendChild(el("title", {}, (s.tracejado ? s.nome + " · " : "") + rotulos[i] + ": " + fmt(v)));
+        c.appendChild(el("title", {}, (s.tracejado ? s.nome + " · " : "") + rotulos[i] + ": " + (s.fmt || fmt)(v)));
         svg.appendChild(c);
       });
     });
@@ -77,10 +77,10 @@
       return false;
     }
     series.forEach(function(s){
-      if (s.tracejado) return;
+      if (s.tracejado && !s.pontos) return;
       s.valores.forEach(function(v, i){
         if (v === null || !isFinite(v)) return;
-        var texto = fmt(v);
+        var texto = (s.fmt || fmt)(v);
         var metaV = metaS ? metaS.valores[i] : null;
         var metaAcima = metaV !== null && metaV !== undefined && isFinite(metaV) && metaV > v;
         var node = el("text", { "font-size": fs, "font-weight": 700, fill: s.cor }, texto);
@@ -304,6 +304,7 @@
   function segDoEt(et){ return et === "AF" ? "finais" : "iniciais"; }
   function numAnual(v){ return v !== null && v !== undefined && isFinite(v); }
   function fmt2(v){ return numAnual(v) ? br(v, 2) : "—"; }
+  function fmtIdear(v){ return numAnual(v) ? br(v, 1) : "—"; }
   function anoArr(row, i){
     var vazio = [null, null, null, null, null, null];
     var arr = row && row[2 + i];
@@ -319,6 +320,7 @@
   function textoColAnual(chave, v){
     if (!numAnual(v)) return "—";
     if (chave === "pos") return v + "º";
+    if (chave === "idear" || chave === "meta") return fmtIdear(v);
     return fmt2(v);
   }
   function catalogoIdear(){
@@ -428,9 +430,9 @@
     var meta = rec.idx.map(function(i){ return serie.meta[i]; });
     var lim = escalaAnual(idear.concat(meta));
     linhas(alvo, rec.anos, [
-      { nome: "IDEAR", valores: idear, cor: cssVar("--azul2") },
-      { nome: "Meta", valores: meta, cor: cssVar("--meta"), tracejado: true }
-    ], lim[0], lim[1], fmt2, fmt2);
+      { nome: "IDEAR", valores: idear, cor: cssVar("--azul2"), fmt: fmtIdear },
+      { nome: "Meta", valores: meta, cor: cssVar("--meta"), tracejado: true, pontos: true, fmt: fmtIdear }
+    ], lim[0], lim[1], fmtIdear, fmtIdear);
   }
   function desenharColunaAnual(et){
     var tabelaEl = $("#tab-idear-" + et), box = $("#graf-col-idear-" + et), chave = colSelAnual[et];
@@ -456,9 +458,10 @@
     box.querySelector("h3").textContent = col.nome + " · " + etapaNome(et);
     if (!vals.length) { box.querySelector(".alvo").innerHTML = '<p class="legenda-sec">Sem valores publicados nesta coluna.</p>'; return; }
     var lim = escalaAnual(vals);
+    var fmtCol = chave === "idear" || chave === "meta" ? fmtIdear : fmt2;
     linhas(box.querySelector(".alvo"), anos, [
-      { nome: col.nome, valores: vals, cor: et === "AF" ? cssVar("--teal") : cssVar("--azul2") }
-    ], lim[0], lim[1], fmt2, fmt2);
+      { nome: col.nome, valores: vals, cor: et === "AF" ? cssVar("--teal") : cssVar("--azul2"), fmt: fmtCol }
+    ], lim[0], lim[1], fmtCol, fmtCol);
   }
   function desenharIdearAnual(){
     desenharGraficoRedeIdear("AI");
@@ -506,7 +509,7 @@
     var info = ultimoAnual(row);
     if (!info) return '<span class="selo vazio">' + rotulo + " · aguardando</span>";
     var rank = (ranksIdear(seg)[info.atual.ano] || {})[e.inep];
-    var txt = rotulo + " " + fmt2(info.atual.v) + " · " + info.atual.ano;
+    var txt = rotulo + " " + fmtIdear(info.atual.v) + " · " + info.atual.ano;
     if (rank) txt += " · " + rank + "º";
     return '<span class="selo">' + txt + "</span>";
   }
@@ -559,9 +562,9 @@
     var meta = rec.idx.map(function(i){ return serie.meta[i]; });
     var lim = escalaAnual(idear.concat(meta));
     linhas(alvo, rec.anos, [
-      { nome: "IDEAR", valores: idear, cor: cssVar("--azul2") },
-      { nome: "Meta", valores: meta, cor: cssVar("--meta"), tracejado: true }
-    ], lim[0], lim[1], fmt2, fmt2);
+      { nome: "IDEAR", valores: idear, cor: cssVar("--azul2"), fmt: fmtIdear },
+      { nome: "Meta", valores: meta, cor: cssVar("--meta"), tracejado: true, pontos: true, fmt: fmtIdear }
+    ], lim[0], lim[1], fmtIdear, fmtIdear);
   }
   function desenharColunaIdearEsc(et){
     var tabelaEl = $("#tab-idear-esc-" + et), box = $("#graf-col-idear-esc-" + et), chave = colSelIdearEsc[et], serie = serieIdearEsc[et];
@@ -587,9 +590,10 @@
     if (!vals.length) { box.querySelector(".alvo").innerHTML = '<p class="legenda-sec">Sem valores publicados nesta coluna.</p>'; return; }
     var lim = chave === "pos" ? faixa(vals) : escalaAnual(vals);
     var fmtPos = function(v){ return String(Math.round(v)) + "º"; };
+    var fmtCol = chave === "pos" ? fmtPos : (chave === "idear" || chave === "meta") ? fmtIdear : fmt2;
     linhas(box.querySelector(".alvo"), anos, [
-      { nome: col.nome, valores: vals, cor: et === "AF" ? cssVar("--teal") : cssVar("--azul2") }
-    ], lim[0], lim[1], chave === "pos" ? fmtPos : fmt2, chave === "pos" ? fmtPos : fmt2);
+      { nome: col.nome, valores: vals, cor: et === "AF" ? cssVar("--teal") : cssVar("--azul2"), fmt: fmtCol }
+    ], lim[0], lim[1], fmtCol, fmtCol);
   }
   function desenharVistaIdear(){
     if (!vistaIdear) return;
@@ -606,9 +610,9 @@
     var cards = "";
     if (info) {
       var rank = (ranksIdear(seg)[info.atual.ano] || {})[String(row[0])];
-      var det = info.anterior ? variacao(info.atual.v, info.anterior.v, 2) + " · " + fmt2(info.anterior.v) + " em " + info.anterior.ano : "Sem edição anterior";
+      var det = info.anterior ? variacao(info.atual.v, info.anterior.v, 1) + " · " + fmtIdear(info.anterior.v) + " em " + info.anterior.ano : "Sem edição anterior";
       if (rank) det = rank + "º no ranking · " + det;
-      cards = '<div class="metricas"><div class="metrica"><div class="v">' + fmt2(info.atual.v) + '</div><div class="l">IDEAR ' + nome + " (" + info.atual.ano + ')</div><div class="d">' + det + "</div></div></div>";
+      cards = '<div class="metricas"><div class="metrica"><div class="v">' + fmtIdear(info.atual.v) + '</div><div class="l">IDEAR ' + nome + " (" + info.atual.ano + ')</div><div class="d">' + det + "</div></div></div>";
     } else {
       cards = '<div class="metricas"><div class="metrica"><div class="v">—</div><div class="l">IDEAR ' + nome + '</div><div class="d">Aguardando resultado</div></div></div>';
     }
