@@ -1,7 +1,7 @@
 /* Service worker: cache para uso offline. Ao atualizar dados, aumente a versão. */
-const CACHE = "indicadores-angra-v28";
+const CACHE = "indicadores-angra-v29";
 const ARQUIVOS = [
-  "./", "./index.html", "./styles.css?v=28", "./app.js?v=28", "./data.js?v=28", "./escolas.js?v=28", "./avalia_escolas.js?v=28", "./manifest.webmanifest", "./favicon.ico",
+  "./", "./index.html", "./styles.css?v=29", "./app.js?v=29", "./data.js?v=29", "./escolas.js?v=29", "./avalia_escolas.js?v=29", "./manifest.webmanifest", "./favicon.ico",
   "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-maskable-192.png", "./icons/icon-maskable-512.png",
   "./icons/apple-touch-icon.png", "./icons/favicon-32.png", "./icons/logo-96.png"
 ];
@@ -15,6 +15,7 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("fetch", (e) => {
   const url = new URL(e.request.url);
   if (url.hostname === "gc.zgo.at" || url.hostname === "nareangra.goatcounter.com") return;
+  /* POST e outros sites (FormSubmit, por exemplo) seguem direto, sem cache. */
   if (e.request.method !== "GET" || url.origin !== location.origin) return;
   /* Cadernos em PDF ficam de fora do cache (são grandes e devem vir da rede). */
   if (url.pathname.toLowerCase().endsWith(".pdf")) return;
